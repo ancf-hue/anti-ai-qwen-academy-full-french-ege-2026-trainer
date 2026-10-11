@@ -1,0 +1,2528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anti-AI Qwen Academy | French EGE-2026</title>
+  <meta name="description" content="Free offline trainer for EGE French 2026: listening, reading, grammar and vocabulary, writing and speaking sections." />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #070b18; --card: rgba(18, 26, 51, 0.72); --card-soft: rgba(255, 255, 255, 0.05);
+      --border: rgba(255, 255, 255, 0.1); --text: #e8ecff; --muted: #9aa4c8;
+      --accent: #22d3ee; --violet: #7c3aed; --green: #22c55e; --red: #ef4444; --orange: #f59e0b;
+    }
+    body {
+      margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.22), transparent 30%),
+                  radial-gradient(circle at top right, rgba(34, 211, 238, 0.18), transparent 28%), var(--bg);
+      color: var(--text); line-height: 1.55; min-height: 100vh;
+    }
+    .container { width: min(1120px, 92%); margin: 0 auto; }
+    header {
+      position: sticky; top: 0; z-index: 50; backdrop-filter: blur(14px);
+      background: rgba(7, 11, 24, 0.82); border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 46px; height: 46px; border-radius: 15px; object-fit: cover;
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 12px 30px rgba(34, 211, 238, 0.18); flex: 0 0 auto;
+    }
+    .brand strong { display: block; font-size: 16px; line-height: 1.2; }
+    .brand small { color: var(--muted); font-size: 12px; }
+    nav { display: flex; gap: 18px; flex-wrap: wrap; }
+    nav a { color: #cfd6ff; text-decoration: none; font-weight: 700; font-size: 14px; transition: color 0.2s; }
+    nav a:hover { color: white; }
+
+    /* Top Controls: Lang & Timer */
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+
+    .lang-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 850;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+    .lang-btn:hover { background: rgba(255, 255, 255, 0.12); }
+    .lang-option { opacity: 0.65; }
+    .lang-option.active { opacity: 1; color: white; }
+    .lang-sep { opacity: 0.45; }
+
+    .timer-widget {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 6px 8px;
+    }
+    .timer-widget select {
+      background: rgba(7, 11, 24, 0.55);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 10px;
+      padding: 6px 8px;
+      font: inherit;
+      font-size: 12px;
+      max-width: 160px;
+    }
+    #timerDisplay {
+      font-family: monospace;
+      font-variant-numeric: tabular-nums;
+      font-weight: 900;
+      min-width: 88px;
+      text-align: center;
+      color: white;
+      font-size: 14px;
+    }
+    .timer-btn {
+      border: 0;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 6px 9px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.15s ease;
+    }
+    .timer-btn:hover { background: rgba(255, 255, 255, 0.14); }
+    .timer-widget.warning #timerDisplay { color: var(--orange); }
+    .timer-widget.danger #timerDisplay {
+      color: var(--red);
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+
+    .hero { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 24px; padding: 48px 0 28px; align-items: start; }
+    .badge {
+      display: inline-flex; align-items: center; padding: 8px 12px; border-radius: 999px;
+      background: rgba(124, 58, 237, 0.18); border: 1px solid rgba(124, 58, 237, 0.35);
+      color: #d8ccff; font-size: 13px; font-weight: 700;
+    }
+    h1 { font-size: clamp(34px, 5vw, 58px); line-height: 1.05; margin: 16px 0; }
+    h1 .accent { color: var(--accent); }
+    .lead { color: #b8c1e6; max-width: 72ch; font-size: 17px; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+    .btn {
+      border: 0; border-radius: 14px; padding: 14px 18px; font-weight: 850; cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      background: linear-gradient(135deg, var(--violet), var(--accent)); color: white;
+      box-shadow: 0 12px 30px rgba(34, 211, 238, 0.18); font-size: 15px;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.secondary { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14); color: #eaf0ff; box-shadow: none; }
+    .btn.small { padding: 10px 14px; font-size: 14px; border-radius: 12px; }
+    .btn.check { background: linear-gradient(135deg, var(--green), var(--accent)); }
+    .panel {
+      background: linear-gradient(180deg, rgba(124, 58, 237, 0.16), rgba(6, 182, 212, 0.10));
+      border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px; padding: 22px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+    .panel h3 { margin: 0 0 14px; font-size: 20px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0; }
+    .metric {
+      background: rgba(7, 11, 24, 0.35); border-radius: 16px; padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08); min-height: 82px;
+    }
+    .metric strong { display: block; font-size: 22px; color: white; margin-bottom: 4px; }
+    .metric span { color: var(--muted); font-size: 12px; }
+    progress {
+      width: 100%; height: 10px; border-radius: 999px; overflow: hidden; appearance: none;
+      background: rgba(255, 255, 255, 0.1); border: none; margin-top: 10px;
+    }
+    progress::-webkit-progress-bar { background: rgba(255, 255, 255, 0.1); border-radius: 999px; }
+    progress::-webkit-progress-value { background: linear-gradient(90deg, var(--violet), var(--accent)); border-radius: 999px; }
+    progress::-moz-progress-bar { background: var(--accent); border-radius: 999px; }
+    .note { color: var(--muted); font-size: 13px; margin-top: 12px; }
+    section { padding: 28px 0; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+    h2 { font-size: clamp(26px, 3vw, 36px); margin: 0; line-height: 1.15; }
+    .sub { color: var(--muted); margin: 6px 0 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(245px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--card); border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 22px; padding: 20px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+      transition: 0.2s;
+    }
+    .card h3 { margin: 0 0 10px; font-size: 20px; }
+    .card p { color: #b8c1e6; margin: 0 0 16px; }
+    .warn-card { border-color: rgba(245, 158, 11, 0.35); background: linear-gradient(180deg, rgba(245, 158, 11, 0.10), rgba(18, 26, 51, 0.72)); }
+    .danger-card { border-color: rgba(239, 68, 68, 0.35); background: linear-gradient(180deg, rgba(239, 68, 68, 0.10), rgba(18, 26, 51, 0.72)); }
+    .success-card { border-color: rgba(34, 197, 94, 0.35); background: linear-gradient(180deg, rgba(34, 197, 94, 0.10), rgba(18, 26, 51, 0.72)); }
+    .tag {
+      display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 850;
+      margin-bottom: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #dbe3ff;
+    }
+    .tag.red { background: rgba(239, 68, 68, 0.14); border-color: rgba(239, 68, 68, 0.35); color: #ffd7d7; }
+    .tag.green { background: rgba(34, 197, 94, 0.14); border-color: rgba(34, 197, 94, 0.35); color: #d7ffe6; }
+    .tag.orange { background: rgba(245, 158, 11, 0.14); border-color: rgba(245, 158, 11, 0.35); color: #fff0cc; }
+    .mini-list { margin: 0; padding-left: 18px; color: #c8d2f5; }
+    .mini-list li { margin: 7px 0; }
+    .filter-bar {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; padding: 14px;
+      background: var(--card-soft); border: 1px solid var(--border); border-radius: 16px; align-items: center;
+    }
+    .filter-bar span { color: var(--muted); font-size: 13px; font-weight: 700; margin-right: 6px; }
+    .filter-btn {
+      padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06); color: var(--text); cursor: pointer; font-size: 13px; font-weight: 700; transition: 0.15s ease;
+    }
+    .filter-btn:hover { background: rgba(255, 255, 255, 0.1); }
+    .filter-btn.active { background: linear-gradient(135deg, var(--violet), var(--accent)); border-color: transparent; color: white; }
+    .question-block {
+      background: var(--card); border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 24px; padding: 24px; margin-bottom: 26px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+    }
+    .q-number {
+      display: inline-block; padding: 6px 12px; border-radius: 999px;
+      background: rgba(124, 58, 237, 0.22); border: 1px solid rgba(124, 58, 237, 0.45);
+      color: #d8ccff; font-size: 13px; font-weight: 850; margin-bottom: 14px;
+    }
+    .q-number.listen { background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.45); color: #d7ffe6; }
+    .q-number.read { background: rgba(245, 158, 11, 0.18); border-color: rgba(245, 158, 11, 0.45); color: #fff0cc; }
+    .q-number.gram { background: rgba(239, 68, 68, 0.18); border-color: rgba(239, 68, 68, 0.45); color: #ffd7d7; }
+    .q-part { margin-bottom: 18px; }
+    .q-part-label { display: inline-block; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); margin-bottom: 8px; }
+    .q-text { font-size: 17px; font-weight: 700; margin: 0; line-height: 1.5; color: #eaf0ff; white-space: pre-wrap; }
+    .q-info {
+      background: rgba(124, 58, 237, 0.10); border-left: 4px solid var(--violet);
+      border-radius: 0 14px 14px 0; padding: 16px 18px; margin: 18px 0; color: #dbe3ff; font-size: 15px; line-height: 1.55; white-space: pre-wrap;
+    }
+    .q-info strong { color: #ffffff; }
+    .q-trainer-label { display: inline-block; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: var(--green); margin-bottom: 10px; }
+    .options { display: grid; gap: 10px; }
+    .option {
+      text-align: left; width: 100%; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text); border-radius: 14px; padding: 14px 16px; cursor: pointer; font-size: 15px; transition: 0.15s ease; white-space: pre-wrap;
+    }
+    .option:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); }
+    .option.correct { background: rgba(34, 197, 94, 0.18); border-color: rgba(34, 197, 94, 0.55); }
+    .option.wrong { background: rgba(239, 68, 68, 0.18); border-color: rgba(239, 68, 68, 0.55); }
+    .option:disabled { cursor: default; }
+    .result-block { margin-top: 14px; padding: 14px 16px; border-radius: 14px; }
+    .result-block.correct { background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.35); }
+    .result-block.wrong { background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); }
+    .verdict { font-size: 17px; font-weight: 900; margin-bottom: 8px; }
+    .verdict.correct { color: #22c55e; }
+    .verdict.wrong { color: #ef4444; }
+    .result-row { margin: 6px 0; color: #d7e6ff; font-size: 15px; }
+    .result-row strong { color: #ffffff; }
+    .source-row { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(255, 255, 255, 0.18); color: var(--muted); font-size: 13px; }
+    .source-row strong { color: #dbe3ff; }
+    .summary {
+      background: linear-gradient(180deg, rgba(34, 197, 94, 0.14), rgba(18, 26, 51, 0.72));
+      border: 1px solid rgba(34, 197, 94, 0.4); border-radius: 24px; padding: 24px; text-align: center; margin-top: 24px;
+    }
+    .summary .score { font-size: 48px; font-weight: 950; color: #fff; }
+    .reset-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; justify-content: flex-end; }
+    .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+    .check-item {
+      display: flex; gap: 12px; align-items: flex-start; background: var(--card-soft);
+      border: 1px solid var(--border); border-radius: 16px; padding: 14px; transition: 0.15s ease;
+    }
+    .check-item input { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--accent); flex: 0 0 auto; }
+    .check-item label { cursor: pointer; color: #dbe3ff; }
+    .check-item.done { opacity: 0.72; background: rgba(34, 211, 238, 0.08); border-color: rgba(34, 211, 238, 0.25); }
+    .check-item.done label { text-decoration: line-through; color: #aab5dc; }
+    .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .day { background: var(--card-soft); border: 1px solid var(--border); border-radius: 18px; padding: 16px; min-height: 112px; }
+    .day b { display: block; color: var(--accent); margin-bottom: 6px; font-size: 14px; letter-spacing: 0.2px; }
+    .day.critical { border-color: rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.08); }
+    .manual-card {
+      background: var(--card); border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 22px; padding: 20px; margin-bottom: 16px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+    }
+    .manual-card h3 { margin: 0 0 10px; font-size: 20px; }
+    .manual-card p { color: #b8c1e6; margin: 8px 0; white-space: pre-wrap; }
+    .answer-hint {
+      margin-top: 10px; padding: 12px 14px; border-radius: 14px;
+      background: rgba(34, 197, 94, 0.10); border: 1px solid rgba(34, 197, 94, 0.28); color: #d7ffe6; font-size: 14px; white-space: pre-wrap;
+    }
+    .check-input { margin-top: 12px; padding-top: 12px; border-top: 1px dashed rgba(255, 255, 255, 0.18); }
+    .check-input label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 700; }
+    .check-input input, .check-input textarea, .answer-input {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06); color: var(--text); font-size: 15px; font-family: inherit;
+    }
+    .check-input textarea { min-height: 120px; resize: vertical; }
+    .check-input input:focus, .check-input textarea:focus, .answer-input:focus {
+      outline: none; border-color: var(--accent); background: rgba(34, 211, 238, 0.06);
+    }
+    .char-counter { font-size: 12px; color: var(--muted); margin-top: 6px; text-align: right; font-family: monospace; }
+    .input-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+    .input-row .answer-input { flex: 1; min-width: 220px; }
+    .answer-input.sequence { font-family: monospace; letter-spacing: 1px; }
+
+    .support-card {
+      background: linear-gradient(180deg, rgba(124, 58, 237, 0.18), rgba(34, 211, 238, 0.10));
+      border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 24px; padding: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    }
+    .support-card h2 { margin-bottom: 10px; }
+    .support-card p { margin: 10px 0; color: #dbe3ff; }
+    .phone { color: white; font-weight: 900; text-decoration: none; border-bottom: 1px dashed rgba(255, 255, 255, 0.45); }
+    .phone:hover { color: var(--accent); }
+    .copy-status { margin-left: 8px; color: var(--green); font-weight: 850; }
+    .support-card a { color: var(--accent); font-weight: 800; text-decoration: none; }
+    .support-card a:hover { text-decoration: underline; }
+    footer { padding: 30px 0 50px; color: var(--muted); text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.08); margin-top: 30px; }
+
+    .audio-section {
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.10), rgba(18, 26, 51, 0.72));
+      border: 1px solid rgba(34, 211, 238, 0.4); border-radius: 24px; padding: 22px 24px;
+      margin-bottom: 26px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+    }
+    .audio-section.violet {
+      background: linear-gradient(180deg, rgba(124, 58, 237, 0.14), rgba(18, 26, 51, 0.72));
+      border-color: rgba(124, 58, 237, 0.5);
+    }
+    .audio-section-tag {
+      display: inline-block; padding: 6px 12px; border-radius: 999px;
+      background: rgba(34, 211, 238, 0.18); border: 1px solid rgba(34, 211, 238, 0.5);
+      color: #cdeeff; font-size: 12px; font-weight: 850; margin-bottom: 10px;
+    }
+    .audio-section.violet .audio-section-tag {
+      background: rgba(124, 58, 237, 0.22); border-color: rgba(124, 58, 237, 0.55); color: #d8ccff;
+    }
+    .audio-section-title { margin: 0 0 8px; font-size: 20px; color: #ffffff; }
+    .audio-section-note { margin: 0; color: #cdeeff; font-size: 14px; line-height: 1.6; }
+    .audio-section.violet .audio-section-note { color: #d8ccff; }
+    .audio-section-note strong { color: #ffffff; }
+    .audio-section-note code {
+      background: rgba(0,0,0,0.4); padding: 2px 8px; border-radius: 6px;
+      color: #ffffff; font-family: monospace; font-size: 13px;
+    }
+    .audio-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .q-audio { margin: 14px 0; padding: 14px; background: rgba(34, 211, 238, 0.08); border: 1px solid rgba(34, 211, 238, 0.35); border-radius: 14px; }
+    .audio-section.violet .q-audio { background: rgba(124, 58, 237, 0.10); border-color: rgba(124, 58, 237, 0.4); }
+    .q-audio audio { width: 100%; display: block; }
+    .audio-error { color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 14px; display: none; }
+    .audio-error code { background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; }
+
+    .details-box {
+      background: var(--card-soft); border: 1px solid var(--border); border-radius: 16px;
+      padding: 14px 16px; margin: 12px 0;
+    }
+    details summary { cursor: pointer; font-weight: 850; color: var(--accent); outline: none; }
+    details[open] summary { margin-bottom: 10px; }
+    .text-body { color: #dbe3ff; white-space: pre-wrap; font-size: 15px; line-height: 1.65; }
+
+    .lex-card { cursor: pointer; text-align: center; transition: 0.25s; }
+    .lex-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .lex-fr { font-size: 24px; color: #fff; font-weight: 850; margin-bottom: 6px; }
+    .lex-ru { color: var(--accent); font-weight: 700; margin-bottom: 8px; }
+    .lex-hidden { display: none; color: #cbe7ff; font-size: 14px; margin-top: 8px; }
+    .speak-btn {
+      background: none; border: 1px solid var(--accent); color: var(--accent); border-radius: 50%;
+      width: 34px; height: 34px; cursor: pointer; margin-top: 8px; font-size: 16px; transition: 0.2s;
+    }
+    .speak-btn:hover { background: var(--accent); color: var(--bg); }
+
+    table.data-table { width: 100%; border-collapse: collapse; margin: 12px 0; color: #dbe3ff; }
+    table.data-table th, table.data-table td { border: 1px solid var(--border); padding: 10px; text-align: left; vertical-align: top; }
+    table.data-table th { background: rgba(255,255,255,0.06); color: #fff; }
+
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: 1fr; }
+      nav { gap: 12px; }
+      .top-controls { width: 100%; justify-content: space-between; }
+      .timer-widget select { max-width: 120px; }
+    }
+    @media (max-width: 600px) {
+      .topbar { flex-direction: column; align-items: flex-start; }
+      nav { width: 100%; overflow-x: auto; padding-bottom: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container topbar">
+      <div class="brand">
+        <img src="favicon.ico" class="brand-logo" alt="Logo" onerror="this.style.display='none'" />
+        <div>
+          <strong data-i18n="brandTitle">Anti-AI Qwen Academy</strong>
+          <small data-i18n="brandSub">Free EGE-2026 Projects</small>
+        </div>
+      </div>
+      
+      <nav>
+        <a href="#structure" data-i18n="navStructure">Structure</a>
+        <a href="#lexique" data-i18n="navLexique">Vocabulary</a>
+        <a href="#pieges" data-i18n="navTraps">Traps</a>
+        <a href="#texts" data-i18n="navTexts">Texts</a>
+        <a href="#trainer" data-i18n="navTrainer">Trainer</a>
+        <a href="#writing" data-i18n="navWriting">Writing</a>
+        <a href="#speaking" data-i18n="navSpeaking">Speaking</a>
+        <a href="#checklist" data-i18n="navChecklist">Checklist</a>
+        <a href="#plan" data-i18n="navPlan">25 Days</a>
+        <a href="#support" data-i18n="navSupport">Support</a>
+      </nav>
+
+      <div class="top-controls">
+        <button id="langToggle" class="lang-btn" type="button" aria-label="Switch Language">
+          <span class="lang-option" data-lang="ru">RU</span>
+          <span class="lang-sep">/</span>
+          <span class="lang-option active" data-lang="en">EN</span>
+        </button>
+
+        <div class="timer-widget" id="timerWidget" role="group" aria-label="Exam Timer">
+          <select id="timerPreset" aria-label="Timer Preset"></select>
+          <span id="timerDisplay">03:10:00</span>
+          <button id="timerToggle" class="timer-btn" type="button">▶</button>
+          <button id="timerReset" class="timer-btn" type="button">↺</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div>
+        <span class="badge" data-i18n="badge">Free • HTML • French EGE-2026</span>
+        <h1 data-i18n="h1">Help you pass <span class="accent">French EGE</span> correctly</h1>
+        <p class="lead" data-i18n="lead">
+          Full trainer: supports official <strong>audio-fr.mp3</strong> for written part
+          and <strong>audio-fr-oral.mp3</strong> for oral task 3, plus backup educational voiceover.
+          Reading, grammar and vocabulary, writing with word count, speaking section,
+          checklist and preparation plan. Written part — 38 tasks, 190 minutes. Oral — 4 tasks.
+        </p>
+        <div class="actions">
+          <button class="btn" onclick="scrollToId('trainer')" data-i18n="actionTrainer">Take the trainer</button>
+          <button class="btn secondary" onclick="scrollToId('writing')" data-i18n="actionWriting">Writing Section</button>
+          <button class="btn secondary" onclick="scrollToId('speaking')" data-i18n="actionSpeaking">Speaking Section</button>
+        </div>
+      </div>
+      <aside class="panel">
+        <h3 data-i18n="quickStats">Quick Stats</h3>
+        <div class="metrics">
+          <div class="metric"><strong id="answeredCount">0/36</strong><span data-i18n="metricAnswered">tasks completed</span></div>
+          <div class="metric"><strong id="correctCount">0</strong><span data-i18n="metricCorrect">correct answers</span></div>
+          <div class="metric"><strong id="checklistProgress">0%</strong><span data-i18n="metricChecklist">checklist</span></div>
+        </div>
+        <progress id="overall" value="0" max="100"></progress>
+        <p class="note" data-i18n="noteReset">Answers, drafts and checklist reset each time the page is opened.</p>
+      </aside>
+    </section>
+
+    <section id="structure">
+      <div class="section-head">
+        <div>
+          <h2 data-i18n="structureTitle">French EGE Structure</h2>
+          <p class="sub" data-i18n="structureSub">Written part — 38 tasks, 190 minutes. Oral part — 4 tasks.</p>
+        </div>
+      </div>
+      <div class="grid">
+        <article class="card warn-card">
+          <span class="tag orange" data-i18n="structSec1Tag">Section 1</span>
+          <h3 data-i18n="structSec1Title">Listening (1–9)</h3>
+          <ul class="mini-list">
+            <li data-i18n="structSec1L1">Task 1 — 6 speakers, match 1–7 (one extra).</li>
+            <li data-i18n="structSec1L2">Task 2 — dialogue, True / False / Not stated.</li>
+            <li data-i18n="structSec1L3">Tasks 3–9 — interview, choose from 3 options.</li>
+            <li data-i18n="structSec1L4">Audio: <code>audio-fr.mp3</code>.</li>
+          </ul>
+        </article>
+        <article class="card warn-card">
+          <span class="tag orange" data-i18n="structSec2Tag">Section 2</span>
+          <h3 data-i18n="structSec2Title">Reading (10–18)</h3>
+          <ul class="mini-list">
+            <li data-i18n="structSec2L1">Task 10 — texts A–G and headings 1–8.</li>
+            <li data-i18n="structSec2L2">Task 11 — gaps A–F, parts 1–7.</li>
+            <li data-i18n="structSec2L3">Tasks 12–18 — text comprehension, 4 options.</li>
+          </ul>
+        </article>
+        <article class="card danger-card">
+          <span class="tag red" data-i18n="structSec3Tag">Section 3</span>
+          <h3 data-i18n="structSec3Title">Grammar & Vocabulary (19–36)</h3>
+          <ul class="mini-list">
+            <li data-i18n="structSec3L1">19–29 — word formation (manual input).</li>
+            <li data-i18n="structSec3L2">30–36 — vocabulary in text, choose 1–4.</li>
+          </ul>
+        </article>
+        <article class="card success-card">
+          <span class="tag green" data-i18n="structSec4Tag">Section 4</span>
+          <h3 data-i18n="structSec4Title">Writing (37–38)</h3>
+          <ul class="mini-list">
+            <li data-i18n="structSec4L1">37 — email to friend, 100–140 words.</li>
+            <li data-i18n="structSec4L2">38.1 — table analysis, 200–250 words.</li>
+            <li data-i18n="structSec4L3">38.2 — chart analysis, 200–250 words.</li>
+          </ul>
+        </article>
+        <article class="card success-card">
+          <span class="tag green" data-i18n="structOralTag">Oral Part</span>
+          <h3 data-i18n="structOralTitle">Speaking (1–4)</h3>
+          <ul class="mini-list">
+            <li data-i18n="structOralL1">1 — reading aloud.</li>
+            <li data-i18n="structOralL2">2 — 4 questions based on ad.</li>
+            <li data-i18n="structOralL3">3 — interview: <code>audio-fr-oral.mp3</code>.</li>
+            <li data-i18n="structOralL4">4 — project presentation with 2 photos.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="lexique">
+      <div class="section-head">
+        <div>
+          <h2 data-i18n="lexTitle">Vocabulary Cards</h2>
+          <p class="sub" data-i18n="lexSub">Click card to see example. Click 🔊 for French pronunciation.</p>
+        </div>
+        <input type="text" id="lexSearch" placeholder="Search by French, Russian or example..."
+               style="padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card-soft); color: var(--text); width: min(320px, 100%); font-size: 14px;"
+               oninput="filterLexique(this.value)" />
+      </div>
+      <div id="lexiqueContainer" class="grid"></div>
+    </section>
+
+    <section id="pieges">
+      <div class="section-head">
+        <div>
+          <h2 data-i18n="trapsTitle">Grammar Traps</h2>
+          <p class="sub" data-i18n="trapsSub">Typical mistakes in tasks 19–36 and writing.</p>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="card warn-card">
+          <h3>depuis / pendant / pour</h3>
+          <p><strong>depuis:</strong> action started in past and continues now.<br>
+          <strong>pendant:</strong> duration of finished action.<br>
+          <strong>pour:</strong> planned duration in future.</p>
+          <div class="q-info">J’habite ici <strong>depuis</strong> 2020.<br>
+          J’ai vécu à Paris <strong>pendant</strong> deux ans.<br>
+          Je pars <strong>pour</strong> une semaine.</div>
+        </div>
+        <div class="card danger-card">
+          <h3>c’est / ce sont / il y a</h3>
+          <p><strong>c’est:</strong> before singular noun.<br>
+          <strong>ce sont:</strong> before plural noun.<br>
+          <strong>il y a:</strong> stating existence.</p>
+          <div class="q-info"><strong>C’est</strong> un livre intéressant.<br>
+          <strong>Ce sont</strong> des étudiants.<br>
+          <strong>Il y a</strong> beaucoup de bruit.</div>
+        </div>
+        <div class="card success-card">
+          <h3>Subjonctif / indicatif</h3>
+          <p>After <strong>bien que, pour que, avant que</strong> — subjunctive.<br>
+          After <strong>après que, penser que, croire que</strong> in assertion — indicative.</p>
+          <div class="q-info">Bien qu’il <strong>soit</strong> fatigué, il travaille.<br>
+          Après qu’il <strong>est parti</strong>, j’ai lu le texte.<br>
+          Je pense qu’il <strong>a</strong> raison.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="texts">
+      <div class="section-head">
+        <div>
+          <h2 data-i18n="textsTitle">Reading and Grammar Texts</h2>
+          <p class="sub" data-i18n="textsSub">Expand relevant block before doing tasks.</p>
+        </div>
+      </div>
+
+      <!-- Text blocks remain in French as they are source material -->
+      <details class="details-box">
+        <summary data-i18n="txtSum1">Task 10. Texts A–G</summary>
+        <div class="text-body">A. Nouveauté au Louvre... [Original French Text Retained]</div>
+      </details>
+      <details class="details-box">
+        <summary data-i18n="txtSum2">Task 11. Text about Maxence</summary>
+        <div class="text-body">Internaute passionné d’histoire... [Original French Text Retained]</div>
+      </details>
+      <details class="details-box">
+        <summary data-i18n="txtSum3">Tasks 12–18. Le mystère des pierres solaires</summary>
+        <div class="text-body">Entre 2013 et 2018... [Original French Text Retained]</div>
+      </details>
+      <details class="details-box">
+        <summary data-i18n="txtSum4">Tasks 19–24. Крабы острова Рождества</summary>
+        <div class="text-body">Chaque année une île est envahie de crabes rouges ! ... [Original French Text Retained]</div>
+      </details>
+      <details class="details-box">
+        <summary data-i18n="txtSum5">Tasks 25–29. Le Théâtre Bolchoï</summary>
+        <div class="text-body">Le Théâtre Bolchoï est le champion... [Original French Text Retained]</div>
+      </details>
+      <details class="details-box">
+        <summary data-i18n="txtSum6">Tasks 30–36. Ouragans et tornades</summary>
+        <div class="text-body">Comment se forment les ouragans... [Original French Text Retained]</div>
+      </details>
+    </section>
+
+    <section id="trainer">
+      <div class="section-head">
+        <div>
+          <h2 data-i18n="trainerTitle">Trainer: Written Part</h2>
+          <p class="sub" data-i18n="trainerSub">Tasks 1–36. Use audio above and answer questions.</p>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <span data-i18n="filterShow">Show:</span>
+        <button class="filter-btn active" id="filterAll" onclick="setFilter('all', this)"></button>
+        <button class="filter-btn" id="filterListen" onclick="setFilter('listen', this)"></button>
+        <button class="filter-btn" id="filterRead" onclick="setFilter('read', this)"></button>
+        <button class="filter-btn" id="filterGram" onclick="setFilter('gram', this)"></button>
+      </div>
+
+      <div class="reset-bar">
+        <button class="btn secondary small" onclick="resetAll()" data-i18n="resetAll">🗑 Reset all progress</button>
+      </div>
+
+      <div id="quizContainer"></div>
+      <div id="summaryBox"></div>
+    </section>
+
+    <section id="writing">
+      <div class="section-head">
+        <div>
+          <h2 data-i18n="writingTitle">Writing: Tasks 37–38</h2>
+          <p class="sub" data-i18n="writingSub">Answers written in Sheet No. 2. Word counter updates automatically.</p>
+        </div>
+      </div>
+
+      <article class="manual-card">
+        <span class="tag red" data-i18n="w37Tag">Task 37</span>
+        <h3 data-i18n="w37Title">Email to foreign friend (100–140 words)</h3>
+        <p>Vous avez reçu le courriel suivant de votre correspondant français Armand. ... [Original Prompt Retained]</p>
+
+        <details class="details-box">
+          <summary data-i18n="w37ModelBtn">Outline and Model Answer</summary>
+          <div class="text-body">Каркас: ... Модель: Salut Armand... [Original Content Retained]</div>
+        </details>
+
+        <div class="check-input">
+          <label data-i18n="draftLabel">Your draft:</label>
+          <textarea class="draft-area" data-task="37" data-min="100" data-max="140" placeholder="Écrivez votre courriel en français..."></textarea>
+          <div class="char-counter" id="counter-37"></div>
+        </div>
+      </article>
+
+      <article class="manual-card">
+        <span class="tag red" data-i18n="w381Tag">Task 38.1</span>
+        <h3 data-i18n="w381Title">Statement based on table (200–250 words)</h3>
+        <p>Vous êtes en train de préparer le projet « La sensibilisation des habitants de Zetlande à la protection de l’environnement »... [Original Prompt Retained]</p>
+        
+        <table class="data-table">
+          <thead>
+            <tr><th>Réponses des sondés</th><th>Nombre de sondés (%)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Organiser des événements de ramassage de déchets</td><td>48</td></tr>
+            <tr><td>Montrer l’exemple au quotidien...</td><td>20</td></tr>
+            <tr><td>Soutenir les organisations environnementales</td><td>18</td></tr>
+            <tr><td>Éduquer ses amis et sa famille</td><td>9</td></tr>
+            <tr><td>Partager des informations sur Internet</td><td>5</td></tr>
+          </tbody>
+        </table>
+
+        <details class="details-box">
+          <summary data-i18n="w381ModelBtn">Model Answer 38.1</summary>
+          <div class="text-body">Actuellement, je prépare un projet... [Original Content Retained]</div>
+        </details>
+
+        <div class="check-input">
+          <label data-i18n="draftLabel">Your draft:</label>
+          <textarea class="draft-area" data-task="38.1" data-min="200" data-max="250" placeholder="Écrivez votre высказывание en français..."></textarea>
+          <div class="char-counter" id="counter-38.1"></div>
+        </div>
+      </article>
+      
+       <article class="manual-card">
+        <span class="tag red" data-i18n="w382Tag">Task 38.2</span>
+        <h3 data-i18n="w382Title">Statement based on chart (200–250 words)</h3>
+        <p>Vous êtes en train de préparer le projet « Une faible fréquentation des clubs scolaires en Zetlande »... [Original Prompt Retained]</p>
+        
+        <div class="answer-hint">
+          <strong data-i18n="importantNote">Important:</strong> PDF chart data not recognized as text. Enter real percentages below if available.
+        </div>
+
+        <div class="check-input">
+          <label data-i18n="chartDataLbl">Chart Data 38.2 (optional):</label>
+          <textarea class="draft-area" data-task="38.2-data" placeholder="Например: 36% — Je n'ai pas le temps..."></textarea>
+        </div>
+
+        <details class="details-box">
+          <summary data-i18n="w382OutlineBtn">Outline for 38.2</summary>
+          <div class="text-body">Actuellement, je prépare un projet... [Original Content Retained]</div>
+        </details>
+
+        <div class="check-input">
+          <label data-i18n="draftLabel">Your draft:</label>
+          <textarea class="draft-area" data-task="38.2" data-min="200" data-max="250" placeholder="Écrivez votre высказывание en français..."></textarea>
+          <div class="char-counter" id="counter-38.2"></div>
+        </div>
+      </article>
+    </section>
+
+    <section id="speaking">
+      <div class="section-head">
+        <div>
+          <h2 data-i18n="speakingTitle">Speaking: Tasks 1–4</h2>
+          <p class="sub" data-i18n="speakingSub">Task 3 designed for file <strong>audio-fr-oral.mp3</strong>. If missing, educational voiceover used.</p>
+        </div>
+      </div>
+
+      <article class="manual-card">
+        <span class="tag green" data-i18n="s1Tag">Task 1</span>
+        <h3 data-i18n="s1Title">Reading Aloud</h3>
+        <p>Vous êtes en train de préparer un projet avec votre ami(e)... [Original Prompt Retained]</p>
+
+        <details class="details-box">
+          <summary data-i18n="s1TextBtn">Text for reading</summary>
+          <div class="text-body" id="oralText1">En France, la plupart des banques proposent une carte bancaire aux enfants... [Original Content Retained]</div>
+        </details>
+
+        <div class="audio-controls">
+          <button class="btn small" onclick="speakText(document.getElementById('oralText1').textContent, 1)">🔊 Listen sample</button>
+          <button class="btn small secondary" onclick="speakText(document.getElementById('oralText1').textContent, 2)">🔊🔊 2 times</button>
+          <button class="btn small secondary" onclick="stopSpeech()">⏹ Stop</button>
+        </div>
+
+        <div class="check-input">
+          <label data-i18n="selfCheckLbl">Mark for self-check:</label>
+          <textarea class="draft-area" data-task="s1" placeholder="Запишите трудные слова, ударения, интонацию..."></textarea>
+        </div>
+      </article>
+
+      <article class="manual-card">
+        <span class="tag green" data-i18n="s2Tag">Task 2</span>
+        <h3 data-i18n="s2Title">Four Questions Based on Ad</h3>
+        <p><strong data-i18n="adLabel">Ad :</strong> Rejoignez notre école de roller !</p>
+        <p>Vous souhaitez prendre des cours de roller... [Original Prompt Retained]</p>
+
+        <div class="answer-hint">
+          <strong data-i18n="modelQs">Question model:</strong>
+1) Quels sont les tarifs des cours à votre école ?
+2) Combien de temps dure un cours collectif ?
+3) Combien de personnes y a-t-il dans un groupe ?
+4) Est-il possible de prendre un cours particulier ?
+        </div>
+
+        <div class="audio-controls">
+          <button class="btn small" onclick="speakText('Rejoignez notre école de roller ! Quels sont les tarifs des cours à votre école ? Combien de temps dure un cours collectif ? Combien de personnes y a-t-il dans un groupe ? Est-il possible de prendre un cours particulier ?', 1)">🔊 Listen model</button>
+        </div>
+
+        <div class="check-input">
+          <label data-i18n="draftLabel">Your draft:</label>
+          <textarea class="draft-area" data-task="s2" placeholder="Écrivez vos quatre questions..."></textarea>
+        </div>
+      </article>
+
+      <article class="manual-card">
+        <span class="tag green" data-i18n="s3Tag">Task 3</span>
+        <h3 data-i18n="s3Title">Interview (audio: <code>audio-fr-oral.mp3</code>)</h3>
+        <p>Vous participez à une interview... [Original Prompt Retained]</p>
+
+        <div class="audio-section violet" style="margin-top: 16px;">
+          <span class="audio-section-tag">🎧 Speaking Part, Task 3. Interview</span>
+          <h3 class="audio-section-title">Audio recording — <code>audio-fr-oral.mp3</code></h3>
+          <p class="audio-section-note">
+            Separate file for oral part. Place next to <code>index.html</code>.
+            If file fails to load, educational text voiceover will be used.
+          </p>
+          <div class="q-audio">
+            <audio id="oralAudio" controls preload="metadata" src="audio-fr-oral.mp3"></audio>
+            <div id="oralAudioError" class="audio-error">
+              ⚠️ <strong>File <code>audio-fr-oral.mp3</code> failed to load.</strong><br>
+              Check location next to index.html. Educational text version available meanwhile.
+            </div>
+          </div>
+          <div class="audio-controls">
+            <button class="btn small" onclick="playOral()">▶ Play interview</button>
+            <button class="btn small secondary" onclick="toggleOral()">⏯ Pause / Resume</button>
+            <button class="btn small secondary" onclick="stopOral()">⏹ Stop</button>
+          </div>
+        </div>
+
+        <details class="details-box" open>
+          <summary data-i18n="eduVerBtn">Educational Text Version of Interview</summary>
+          <div class="answer-hint">
+            <strong data-i18n="attentionLbl">Attention:</strong> Original questions in PDF not recognized as text. Below — educational questions and model answer.
+            With official <code>audio-fr-oral.mp3</code>, use audio.
+          </div>
+          <div class="text-body" id="oralText3">Questions:
+1) Est-ce que tu lis beaucoup de livres ?
+... Modèle: Oui, j’essaie de lire... [Original Content Retained]</div>
+        </details>
+
+        <div class="check-input">
+          <label data-i18n="draftLabel">Your draft:</label>
+          <textarea class="draft-area" data-task="s3" placeholder="Écrivez vos réponses..."></textarea>
+        </div>
+      </article>
+
+      <article class="manual-card">
+        <span class="tag green" data-i18n="s4Tag">Task 4</span>
+        <h3 data-i18n="s4Title">Project Work with Two Photos</h3>
+        <p>Vous travaillez avec votre ami(e) sur le projet scolaire « La meilleure saison : l’automne ou l’hiver »... [Original Prompt Retained]</p>
+
+        <div class="answer-hint">
+          <strong data-i18n="photoNote">Note:</strong> Specific photos in PDF not described in text. Below — educational model for typical photos "autumn park" and "winter city".
+        </div>
+
+        <details class="details-box">
+          <summary data-i18n="monoModelBtn">Monologue Response Model</summary>
+          <div class="text-body" id="oralText4">Bonjour ! Je t’envoie ce message vocal... [Original Content Retained]</div>
+        </details>
+
+        <div class="audio-controls">
+          <button class="btn small" onclick="speakText(document.getElementById('oralText4').textContent, 1)">🔊 Listen model</button>
+        </div>
+
+        <div class="check-input">
+          <label data-i18n="draftLabel">Your draft:</label>
+          <textarea class="draft-area" data-task="s4" placeholder="Écrivez votre message vocal..."></textarea>
+        </div>
+      </article>
+    </section>
+
+    <section id="checklist">
+      <div class="section-head">
+        <div>
+          <h2 data-i18n="checklistTitle">EGE-2026 Preparation Checklist</h2>
+          <p class="sub" data-i18n="checklistSub">Tick completed items — checklist resets on new page opening.</p>
+        </div>
+      </div>
+      <ul class="checklist" id="checklistUl">
+         <!-- Populated by JS -->
+      </ul>
+    </section>
+
+    <section id="plan">
+      <div class="section-head">
+        <div>
+          <h2 data-i18n="planTitle">Full 25-Day Course for Grade 11</h2>
+          <p class="sub" data-i18n="planSub">Preparation route according to EGE-2026 French structure.</p>
+        </div>
+      </div>
+      <div class="plan-grid" id="planGrid">
+         <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <section id="support">
+      <div class="support-card">
+        <h2 data-i18n="supportTitle">🤝 SUPPORT THE PROJECT 💙</h2>
+        <p data-i18n="supportP1"><strong>The app is free. It was and will remain free.</strong></p>
+        <p>
+          <span data-i18n="supportPhoneLabel">📱 TRANSFER BY PHONE NUMBER:</span>
+          <a class="phone" href="tel:89202275676">8-920-227-56-76</a>
+          <button class="btn small" onclick="copyPhone()" data-i18n="copyPhone">📋 Copy number</button>
+          <span id="copyStatus" class="copy-status" aria-live="polite"></span>
+        </p>
+        <p data-i18n="supportP3">✅ Money arrives instantly. No commission. Safe.</p>
+        <p>🌟 👉 <a href="https://ancf-hue.github.io/" target="_blank" rel="noopener noreferrer" data-i18n="supportCatalog">Catalog of free offline Anti-AI Shield apps</a>.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container" data-i18n="footer">
+      Anti-AI Qwen Academy • Free HTML Project • French EGE-2026
+    </div>
+  </footer>
+
+  <script>
+    const STORAGE = {
+      answers: "antiIiKvenFr2026v1Answers",
+      checklist: "antiIiKvenFr2026v1Checklist",
+      shuffle: "antiIiKvenFr2026v1Shuffle",
+      manual: "antiIiKvenFr2026v1Manual"
+    };
+
+    // ============================================================
+    // TRANSLATIONS DICTIONARY
+    // ============================================================
+    const I18N = {
+      en: {
+        docTitle: `Anti-AI Qwen Academy | French EGE-2026`,
+        metaDesc: `Free offline trainer for EGE French 2026: listening, reading, grammar and vocabulary, writing and speaking sections.`,
+        brandTitle: `Anti-AI Qwen Academy`,
+        brandSub: `Free EGE-2026 Projects`,
+        navStructure: `Structure`,
+        navLexique: `Vocabulary`,
+        navTraps: `Traps`,
+        navTexts: `Texts`,
+        navTrainer: `Trainer`,
+        navWriting: `Writing`,
+        navSpeaking: `Speaking`,
+        navChecklist: `Checklist`,
+        navPlan: `25 Days`,
+        navSupport: `Support`,
+        badge: `Free • HTML • French EGE-2026`,
+        h1: `Help you pass <span class="accent">French EGE</span> correctly`,
+        lead: `Full trainer: supports official <strong>audio-fr.mp3</strong> for written part and <strong>audio-fr-oral.mp3</strong> for oral task 3, plus backup educational voiceover. Reading, grammar and vocabulary, writing with word count, speaking section, checklist and preparation plan. Written part — 38 tasks, 190 minutes. Oral — 4 tasks.`,
+        actionTrainer: `Take the trainer`,
+        actionWriting: `Writing Section`,
+        actionSpeaking: `Speaking Section`,
+        quickStats: `Quick Stats`,
+        metricAnswered: `tasks completed`,
+        metricCorrect: `correct answers`,
+        metricChecklist: `checklist`,
+        noteReset: `Answers, drafts and checklist reset each time the page is opened.`,
+        structureTitle: `French EGE Structure`,
+        structureSub: `Written part — 38 tasks, 190 minutes. Oral part — 4 tasks.`,
+        
+        structSec1Tag: `Section 1`,
+        structSec1Title: `Listening (1–9)`,
+        structSec1L1: `Task 1 — 6 speakers, match 1–7 (one extra).`,
+        structSec1L2: `Task 2 — dialogue, True / False / Not stated.`,
+        structSec1L3: `Tasks 3–9 — interview, choose from 3 options.`,
+        structSec1L4: `Audio: <code>audio-fr.mp3</code>.`,
+
+        structSec2Tag: `Section 2`,
+        structSec2Title: `Reading (10–18)`,
+        structSec2L1: `Task 10 — texts A–G and headings 1–8.`,
+        structSec2L2: `Task 11 — gaps A–F, parts 1–7.`,
+        structSec2L3: `Tasks 12–18 — text comprehension, 4 options.`,
+
+        structSec3Tag: `Section 3`,
+        structSec3Title: `Grammar & Vocabulary (19–36)`,
+        structSec3L1: `19–29 — word formation (manual input).`,
+        structSec3L2: `30–36 — vocabulary in text, choose 1–4.`,
+
+        structSec4Tag: `Section 4`,
+        structSec4Title: `Writing (37–38)`,
+        structSec4L1: `37 — email to friend, 100–140 words.`,
+        structSec4L2: `38.1 — table analysis, 200–250 words.`,
+        structSec4L3: `38.2 — chart analysis, 200–250 words.`,
+
+        structOralTag: `Oral Part`,
+        structOralTitle: `Speaking (1–4)`,
+        structOralL1: `1 — reading aloud.`,
+        structOralL2: `2 — 4 questions based on ad.`,
+        structOralL3: `3 — interview: <code>audio-fr-oral.mp3</code>.`,
+        structOralL4: `4 — project presentation with 2 photos.`,
+
+        lexTitle: `Vocabulary Cards`,
+        lexSub: `Click card to see example. Click 🔊 for French pronunciation.`,
+        
+        trapsTitle: `Grammar Traps`,
+        trapsSub: `Typical mistakes in tasks 19–36 and writing.`,
+
+        textsTitle: `Reading and Grammar Texts`,
+        textsSub: `Expand relevant block before doing tasks.`,
+        txtSum1: `Task 10. Texts A–G`,
+        txtSum2: `Task 11. Text about Maxence`,
+        txtSum3: `Tasks 12–18. Solar Stones Mystery`,
+        txtSum4: `Tasks 19–24. Christmas Island Crabs`,
+        txtSum5: `Tasks 25–29. Bolshoi Theatre`,
+        txtSum6: `Tasks 30–36. Hurricanes and Tornadoes`,
+
+        trainerTitle: `Trainer: Written Part`,
+        trainerSub: `Tasks 1–36. Use audio above and answer questions.`,
+        filterShow: `Show:`,
+        filterAll: `All`,
+        filterListen: `Listening`,
+        filterRead: `Reading`,
+        filterGram: `Grammar`,
+        resetAll: `🗑 Reset all progress`,
+
+        writingTitle: `Writing: Tasks 37–38`,
+        writingSub: `Answers written in Sheet No. 2. Word counter updates automatically.`,
+        w37Tag: `Task 37`,
+        w37Title: `Email to foreign friend (100–140 words)`,
+        w37ModelBtn: `Outline and Model Answer`,
+        draftLabel: `Your draft:`,
+        w381Tag: `Task 38.1`,
+        w381Title: `Statement based on table (200–250 words)`,
+        w381ModelBtn: `Model Answer 38.1`,
+        w382Tag: `Task 38.2`,
+        w382Title: `Statement based on chart (200–250 words)`,
+        importantNote: `Important:`,
+        chartDataLbl: `Chart Data 38.2 (optional):`,
+        w382OutlineBtn: `Outline for 38.2`,
+
+        speakingTitle: `Speaking: Tasks 1–4`,
+        speakingSub: `Task 3 designed for file <strong>audio-fr-oral.mp3</strong>. If missing, educational voiceover used.`,
+        s1Tag: `Task 1`,
+        s1Title: `Reading Aloud`,
+        s1TextBtn: `Text for reading`,
+        selfCheckLbl: `Mark for self-check:`,
+        s2Tag: `Task 2`,
+        s2Title: `Four Questions Based on Ad`,
+        adLabel: `Ad :`,
+        modelQs: `Question model:`,
+        s3Tag: `Task 3`,
+        s3Title: `Interview (audio: <code>audio-fr-oral.mp3</code>)`,
+        eduVerBtn: `Educational Text Version of Interview`,
+        attentionLbl: `Attention:`,
+        s4Tag: `Task 4`,
+        s4Title: `Project Work with Two Photos`,
+        photoNote: `Note:`,
+        monoModelBtn: `Monologue Response Model`,
+
+        checklistTitle: `EGE-2026 Preparation Checklist`,
+        checklistSub: `Tick completed items — checklist resets on new page opening.`,
+        planTitle: `Full 25-Day Course for Grade 11`,
+        planSub: `Preparation route according to EGE-2026 French structure.`,
+        dayPrefix: `Day`,
+
+        supportTitle: `🤝 SUPPORT THE PROJECT 💙`,
+        supportP1: `<strong>The app is free. It was and will remain free.</strong>`,
+        supportPhoneLabel: `📱 TRANSFER BY PHONE NUMBER:`,
+        copyPhone: `📋 Copy number`,
+        copied: `✓ Copied`,
+        supportP3: `✅ Money arrives instantly. No commission. Safe.`,
+        supportCatalog: `Catalog of free offline Anti-AI Shield apps`,
+        footer: `Anti-AI Qwen Academy • Free HTML Project • French EGE-2026`,
+
+        // Quiz Labels
+        qLabel1: `1. Question`,
+        qLabel2: `2. Information`,
+        qLabel3: `3. Trainer — Answer Yourself`,
+        resCorrect: `✅ Correct!`,
+        resWrong: `❌ Wrong.`,
+        resAns: `Correct answer:`,
+        resExp: `Explanation:`,
+        resSrc: `Source:`,
+        sumDone: `Completed:`,
+        sumOf: `of`,
+        sumCorr: `Correct answers:`,
+        sumFin: `Answer all tasks to see final result.`,
+        verExc: `Excellent result! / Très bien !`,
+        verGood: `Good, but analyze mistakes. / Continue !`,
+        verNeed: `Need to work through material. / Il faut réviser !`,
+        confReset: `Reset all answers, drafts and timer?`,
+        errCopy: `Could not copy automatically. Number: `,
+        
+        // Topic Labels
+        topicListen: `Listening`,
+        topicRead: `Reading`,
+        topicGram: `Grammar & Vocab`,
+
+        // Timer Labels
+        timerFr: `French Exam — 190 min`,
+        timerPractice: `Practice — 60 min`,
+        timerUp: `Time is up!`,
+        timerStart: `Start timer`,
+        timerPause: `Pause timer`,
+        timerReset: `Reset timer`
+      },
+      ru: {
+        docTitle: `Анти-ИИ Квен Академия | Французский язык ЕГЭ-2026`,
+        metaDesc: `Бесплатный тренажёр ЕГЭ по французскому языку 2026: аудирование, чтение, грамматика и лексика, письменная и устная часть.`,
+        brandTitle: `Анти-ИИ Квен Академия`,
+        brandSub: `Бесплатные проекты ЕГЭ-2026`,
+        navStructure: `Структура`,
+        navLexique: `Лексика`,
+        navTraps: `Ловушки`,
+        navTexts: `Тексты`,
+        navTrainer: `Тренажёр`,
+        navWriting: `Письмо`,
+        navSpeaking: `Устная часть`,
+        navChecklist: `Чек-лист`,
+        navPlan: `25 дней`,
+        navSupport: `Поддержать`,
+        badge: `Бесплатно • HTML • Французский язык ЕГЭ-2026`,
+        h1: `Поможем сдать <span class="accent">ЕГЭ по французскому</span> правильно`,
+        lead: `Полный тренажёр: поддержка официального <strong>audio-fr.mp3</strong> для письменной части и <strong>audio-fr-oral.mp3</strong> для устного задания 3, плюс резервная учебная озвучка. Чтение, грамматика и лексика, письменная часть с подсчётом слов, устная часть, чек-лист и план подготовки. Письменная часть — 38 заданий, 190 минут. Устная — 4 задания.`,
+        actionTrainer: `Пройти тренажёр`,
+        actionWriting: `Письменная речь`,
+        actionSpeaking: `Устная часть`,
+        quickStats: `Быстрая статистика`,
+        metricAnswered: `заданий пройдено`,
+        metricCorrect: `правильных ответов`,
+        metricChecklist: `чек-лист`,
+        noteReset: `Ответы, черновики и чек-лист сбрасываются при каждом открытии страницы.`,
+        structureTitle: `Структура ЕГЭ по французскому языку`,
+        structureSub: `Письменная часть — 38 заданий, 190 минут. Устная часть — 4 задания.`,
+        
+        structSec1Tag: `Раздел 1`,
+        structSec1Title: `Аудирование (1–9)`,
+        structSec1L1: `Задание 1 — 6 говорящих, соответствие 1–7 (одно лишнее).`,
+        structSec1L2: `Задание 2 — диалог, Vrai / Faux / Aucune information.`,
+        structSec1L3: `Задания 3–9 — интервью, выбор из 3 вариантов.`,
+        structSec1L4: `Аудио: <code>audio-fr.mp3</code>.`,
+
+        structSec2Tag: `Раздел 2`,
+        structSec2Title: `Чтение (10–18)`,
+        structSec2L1: `Задание 10 — тексты A–G и заголовки 1–8.`,
+        structSec2L2: `Задание 11 — пропуски A–F, части 1–7.`,
+        structSec2L3: `Задания 12–18 — понимание текста, 4 варианта.`,
+
+        structSec3Tag: `Раздел 3`,
+        structSec3Title: `Грамматика и лексика (19–36)`,
+        structSec3L1: `19–29 — словообразование (ручной ввод).`,
+        structSec3L2: `30–36 — лексика в тексте, выбор 1–4.`,
+
+        structSec4Tag: `Раздел 4`,
+        structSec4Title: `Письменная речь (37–38)`,
+        structSec4L1: `37 — электронное письмо, 100–140 слов.`,
+        structSec4L2: `38.1 — таблица, 200–250 слов.`,
+        structSec4L3: `38.2 — диаграмма, 200–250 слов.`,
+
+        structOralTag: `Устная часть`,
+        structOralTitle: `Говорение (1–4)`,
+        structOralL1: `1 — чтение вслух.`,
+        structOralL2: `2 — 4 вопроса по объявлению.`,
+        structOralL3: `3 — интервью: <code>audio-fr-oral.mp3</code>.`,
+        structOralL4: `4 — проект по 2 фото.`,
+
+        lexTitle: `Лексические карточки`,
+        lexSub: `Нажмите на карточку, чтобы увидеть пример. Нажмите 🔊 для французского произношения.`,
+        
+        trapsTitle: `Лексико-грамматические ловушки`,
+        trapsSub: `Типичные ошибки в заданиях 19–36 и в письменной части.`,
+
+        textsTitle: `Тексты для чтения и грамматики`,
+        textsSub: `Разверните нужный блок перед выполнением заданий.`,
+        txtSum1: `Задание 10. Тексты A–G`,
+        txtSum2: `Задание 11. Текст про Maxence`,
+        txtSum3: `Задания 12–18. Le mystère des pierres solaires`,
+        txtSum4: `Задания 19–24. Крабы острова Рождества`,
+        txtSum5: `Задания 25–29. Le Théâtre Bolchoï`,
+        txtSum6: `Задания 30–36. Ouragans et tornades`,
+
+        trainerTitle: `Тренажёр: письменная часть`,
+        trainerSub: `Задания 1–36. Используйте аудио выше и отвечайте на вопросы.`,
+        filterShow: `Показать:`,
+        filterAll: `Все`,
+        filterListen: `Аудирование`,
+        filterRead: `Чтение`,
+        filterGram: `Грамматика`,
+        resetAll: `🗑 Сбросить весь прогресс`,
+
+        writingTitle: `Письменная речь: задания 37–38`,
+        writingSub: `Ответы пишутся в бланк № 2. Счётчик слов обновляется автоматически.`,
+        w37Tag: `Задание 37`,
+        w37Title: `Электронное письмо зарубежному другу (100–140 слов)`,
+        w37ModelBtn: `Каркас и модель ответа`,
+        draftLabel: `Твой черновик:`,
+        w381Tag: `Задание 38.1`,
+        w381Title: `Высказывание по таблице (200–250 слов)`,
+        w381ModelBtn: `Модель ответа 38.1`,
+        w382Tag: `Задание 38.2`,
+        w382Title: `Высказывание по диаграмме (200–250 слов)`,
+        importantNote: `Важно:`,
+        chartDataLbl: `Данные диаграммы 38.2 (необязательно):`,
+        w382OutlineBtn: `Каркас для 38.2`,
+
+        speakingTitle: `Устная часть: задания 1–4`,
+        speakingSub: `Задание 3 рассчитано на файл <strong>audio-fr-oral.mp3</strong>. Если файла нет, включается учебная текстовая озвучка.`,
+        s1Tag: `Задание 1`,
+        s1Title: `Чтение вслух`,
+        s1TextBtn: `Текст для чтения`,
+        selfCheckLbl: `Отметьте для самопроверки:`,
+        s2Tag: `Задание 2`,
+        s2Title: `Четыре вопроса по объявлению`,
+        adLabel: `Объявление :`,
+        modelQs: `Модель вопросов:`,
+        s3Tag: `Задание 3`,
+        s3Title: `Интервью (аудио: <code>audio-fr-oral.mp3</code>)`,
+        eduVerBtn: `Учебная текстовая версия интервью`,
+        attentionLbl: `Внимание:`,
+        s4Tag: `Задание 4`,
+        s4Title: `Проектная работа по двум фотографиям`,
+        photoNote: `Примечание:`,
+        monoModelBtn: `Модель монологического ответа`,
+
+        checklistTitle: `Чек-лист подготовки к ЕГЭ-2026 по французскому`,
+        checklistSub: `Отмечай выполненные пункты — при новом открытии страницы чек-лист сбросится.`,
+        planTitle: `Полный курс 25 дней для 11 класса`,
+        planSub: `Маршрут подготовки по структуре ЕГЭ-2026 по французскому языку.`,
+        dayPrefix: `День`,
+
+        supportTitle: `🤝 ПОДДЕРЖАТЬ ПРОЕКТ 💙`,
+        supportP1: `<strong>Приложение бесплатное. Было и останется.</strong>`,
+        supportPhoneLabel: `📱 ПЕРЕВОД ПО НОМЕРУ ТЕЛЕФОНА:`,
+        copyPhone: `📋 Копировать номер`,
+        copied: `✓ Скопировано`,
+        supportP3: `✅ Деньги придут мгновенно. Без комиссии. Безопасно.`,
+        supportCatalog: `Каталог бесплатных офлайн-приложений Anti-AI Shield`,
+        footer: `Анти-ИИ Квен Академия • Бесплатный HTML-проект • Французский язык ЕГЭ-2026`,
+
+        // Quiz Labels
+        qLabel1: `1. Вопрос`,
+        qLabel2: `2. Информация`,
+        qLabel3: `3. Тренажёр — ответь сам`,
+        resCorrect: `✅ Правильно!`,
+        resWrong: `❌ Неправильно.`,
+        resAns: `Правильный ответ:`,
+        resExp: `Пояснение:`,
+        resSrc: `Источник:`,
+        sumDone: `Пройдено:`,
+        sumOf: `из`,
+        sumCorr: `Правильных ответов:`,
+        sumFin: `Ответь на все задания, чтобы увидеть итог.`,
+        verExc: `Отличный результат! / Très bien !`,
+        verGood: `Хорошо, но разбери ошибки. / Continue !`,
+        verNeed: `Нужно проработать материал. / Il faut réviser !`,
+        confReset: `Сбросить все ответы, черновики и таймер?`,
+        errCopy: `Не удалось скопировать автоматически. Номер: `,
+        
+        // Topic Labels
+        topicListen: `Аудирование`,
+        topicRead: `Чтение`,
+        topicGram: `Грамматика и лексика`,
+
+        // Timer Labels
+        timerFr: `Французский экзамен — 190 мин`,
+        timerPractice: `Тренировка — 60 мин`,
+        timerUp: `Время вышло!`,
+        timerStart: `Запустить таймер`,
+        timerPause: `Пауза таймера`,
+        timerReset: `Сброс таймера`
+      }
+    };
+
+    let currentLang = "en";
+
+    function loc(key) {
+      return I18N[currentLang][key] || "";
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+    }
+    function scrollToId(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }
+    function normalizeFrench(s) { return String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+    function normalizeSearch(s) {
+      return String(s)
+        .toLowerCase()
+        .replace(/[’']/g, "'")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    /* =========================================================
+       CONFIGURATION — TWO AUDIO FILES
+       ========================================================= */
+    const AUDIO_WRITTEN = "audio-fr.mp3";           // written part, tasks 1–9
+    const AUDIO_ORAL = "audio-fr-oral.mp3";         // oral part, task 3 (interview)
+    const EXAM_MINUTES = 190;
+
+    /* =========================================================
+       STATE
+       ========================================================= */
+    let savedAnswers = {};
+    let manualNotes = {};
+    let currentFilter = "all";
+    let timerInterval = null;
+    let timeLeft = EXAM_MINUTES * 60;
+    let frVoice = null;
+    let writtenAudioOK = false;
+    let oralAudioOK = false;
+
+    /* =========================================================
+       VOCABULARY DATABASE
+       ========================================================= */
+    const lexiqueDatabase = [
+      { fr: "l’environnement", ru: "окружающая среда", ex: "Protéger l’environnement est important." },
+      { fr: "la ville", ru: "город", ex: "J’habite dans une grande ville." },
+      { fr: "le transport", ru: "транспорт", ex: "Les transports en commun sont pratiques." },
+      { fr: "la culture", ru: "культура", ex: "La culture française m’intéresse." },
+      { fr: "l’éducation", ru: "образование", ex: "L’éducation change la vie." },
+      { fr: "la santé", ru: "здоровье", ex: "Le sport améliore la santé." },
+      { fr: "le travail", ru: "работа", ex: "Je veux trouver un bon travail." },
+      { fr: "les loisirs", ru: "досуг", ex: "Mes loisirs sont la lecture et la musique." },
+      { fr: "la famille", ru: "семья", ex: "Ma famille habite à Kazan." },
+      { fr: "le voyage", ru: "путешествие", ex: "Nous faisons un voyage à vélo." },
+      { fr: "la musique", ru: "музыка", ex: "J’écoute de la musique classique." },
+      { fr: "l’histoire", ru: "история", ex: "J’aime l’histoire de France." }
+    ];
+
+    /* =========================================================
+       BACKUP EDUCATIONAL AUDIO SCRIPTS
+       ========================================================= */
+    const listeningScripts = {
+      task1: `Partie 1. Vous entendrez six déclarations.\n\nA. Le vélo est écologique...\nB. J’ai commencé le cyclisme...\nC. Même à soixante-dix ans...\nD. Depuis l’ouverture...\nE. Lors de mon dernier voyage...\nF. Pendant notre périple...`,
+      task2: `Partie 2. Vous entendrez un dialogue entre Anne et Tony.\n\nAnne : Tu sais, moi, j’adore les vieilles maisons...\nTony : Et moi, je voudrais vivre loin...`,
+      interview: `Partie 3. Vous entendrez une interview de Sophie, musicienne.\n\nJournaliste : Sophie, vous êtes nommée...\nSophie : Parce que je viens d’enregistrer...`
+    };
+
+    /* =========================================================
+       QUIZ DATA (Translated Content)
+       ========================================================= */
+    const quizRaw = [
+      {
+        id: 1, task: 1, topic: "listen", type: "sequence", len: 6, correct: "361452",
+        en: {
+          text: `Match speakers A–F with statements 1–7. One statement is extra.`,
+          info: `1. Seniors continue cycling.\n2. Bike breakdowns frequent during trips.\n3. Bikes reduce air pollution.\n4. Cycle lanes improved recently.\n5. Bikes allow meeting new people.\n6. Possible career in cycling.\n7. Bikes inspire trying other transport.`,
+          explanation: `A-3, B-6, C-1, D-4, E-5, F-2. Extra: 7.`,
+          source: `Educational script; verify keys with audio-fr.mp3`
+        },
+        ru: {
+          text: `Установите соответствие между высказываниями говорящих A–F и утверждениями 1–7. Одно утверждение лишнее.`,
+          info: `1. Les seniors continuent de pratiquer le cyclisme.\n2. Les pannes de vélo sont fréquentes lors des voyages.\n3. Le vélo contribue à la réduction de la pollution de l’air.\n4. Les pistes cyclables se sont améliorées dernièrement.\n5. Le vélo permet de faire de nouvelles connaissances.\n6. Il est possible de faire une carrière dans le cyclisme.\n7. Le vélo donne envie d'essayer d'autres modes de transport.`,
+          explanation: `A-3, B-6, C-1, D-4, E-5, F-2. Лишнее: 7.`,
+          source: `Учебный аудиоскрипт; ключи проверить по audio-fr.mp3`
+        }
+      },
+      {
+        id: 2, task: 2, topic: "listen", type: "sequence", len: 7, correct: "2122113",
+        en: {
+          text: `Identify which statements A–G correspond to text (1 – True), do not correspond (2 – False), and are not mentioned (3 – Not stated).`,
+          info: `A. Anne's family has vacation home.\nB. Tony wants to live isolated far from big cities.\nC. Tony wants to grow fruits in garden.\nD. Tony's ideal house would be 250 sq meters.\nE. Anne likes old stone buildings.\nF. Anne's house would have space for books.\nG. Anne would like basement apartment.`,
+          explanation: `A-2, B-1, C-2, D-2, E-1, F-1, G-3.`,
+          source: `Educational script; verify keys with audio-fr.mp3`
+        },
+        ru: {
+          text: `Определите, какие утверждения A–G соответствуют тексту (1 – Vrai), какие не соответствуют (2 – Faux), и о чём не сказано (3 – Aucune information).`,
+          info: `A. La famille d’Anne possède une maison de vacances.\nB. Tony aimerait vivre isolé loin des grandes villes.\nC. Tony voudrait cultiver des fruits dans son jardin.\nD. La maison idéale de Tony ferait 250 mètres carrés.\nE. Anne aime les vieux bâtiments construits en pierre.\nF. La maison d’Anne aurait de l’espace pour ses livres.\nG. Anne aimerait habiter un appartement en sous-sol.`,
+          explanation: `A-2, B-1, C-2, D-2, E-1, F-1, G-3.`,
+          source: `Учебный аудиоскрипт; ключи проверить по audio-fr.mp3`
+        }
+      },
+      {
+        id: 3, task: 3, topic: "listen", type: "mc",
+        en: {
+          text: `Sophie nominated for Victoires de la Musique for having...`,
+          info: `Choose 1, 2 or 3.`,
+          options: [`1) recorded an album.`, `2) composed music for viola.`, `3) conducted symphony orchestra.`],
+          explanation: `In audio: "je viens d’enregistrer un album". Correct option 1.`,
+          source: `Educational script; verify keys with audio-fr.mp3`
+        },
+        ru: {
+          text: `Sophie est nommée aux Victoires de la Musique pour avoir...`,
+          info: `Выберите 1, 2 или 3.`,
+          options: [`1) enregistré un album de musique.`, `2) composé de la musique pour viole.`, `3) dirigé un orchestre symphonique.`],
+          explanation: `В аудио: «je viens d’enregistrer un album». Правильный вариант 1.`,
+          source: `Учебный аудиоскрипт; ключи проверить по audio-fr.mp3`
+        },
+        correctIndex: 0
+      },
+      {
+        id: 4, task: 4, topic: "listen", type: "mc",
+        en: {
+          text: `Sophie embarrassed by nomination because...`,
+          info: `Choose 1, 2 or 3.`,
+          options: [`1) jury members too strict.`, `2) selection criteria subjective.`, `3) some participants dishonest.`],
+          explanation: `Sophie says criteria peu objectifs. Correct option 2.`,
+          source: `Educational script; verify keys with audio-fr.mp3`
+        },
+        ru: {
+          text: `Sophie est gênée par sa nomination, car...`,
+          info: `Выберите 1, 2 или 3.`,
+          options: [`1) les membres du jury sont trop sévères.`, `2) les critères de sélection sont peu objectifs.`, `3) certains participants sont malhonnêtes.`],
+          explanation: `Sophie dit que les critères sont peu objectifs. Правильный вариант 2.`,
+          source: `Учебный аудиоскрипт; ключи проверить по audio-fr.mp3`
+        },
+        correctIndex: 1
+      },
+      {
+        id: 5, task: 5, topic: "listen", type: "mc",
+        en: {
+          text: `Why did Victoires de la Musique modernize?`,
+          info: `Choose 1, 2 or 3.`,
+          options: [`1) Nominees younger.`, `2) Mix of different musics.`, `3) More women nominees.`],
+          explanation: `Audio mentions mélange de musiques différentes. Correct option 2.`,
+          source: `Educational script; verify keys with audio-fr.mp3`
+        },
+        ru: {
+          text: `Pourquoi les Victoires de la Musique se sont-elles modernisées ?`,
+          info: `Выберите 1, 2 или 3.`,
+          options: [`1) Les nommés sont de plus en plus jeunes.`, `2) Il y a un mélange de musiques différentes.`, `3) Il y a plus de femmes parmi les nommés.`],
+          explanation: `В аудио упоминается mélange de musiques différentes. Правильный вариант 2.`,
+          source: `Учебный аудиоскрипт; ключи проверить по audio-fr.mp3`
+        },
+        correctIndex: 1
+      },
+      {
+        id: 6, task: 6, topic: "listen", type: "mc",
+        en: {
+          text: `Why does ceremony please Sophie?`,
+          info: `Choose 1, 2 or 3.`,
+          options: [`1) Artists sell more records.`, `2) Artists get funding.`, `3) Public discovers viola.`],
+          explanation: `Sophie happy public discovers viola. Correct option 3.`,
+          source: `Educational script; verify keys with audio-fr.mp3`
+        },
+        ru: {
+          text: `Pour quelle raison la cérémonie fait-elle plaisir à Sophie ?`,
+          info: `Выберите 1, 2 или 3.`,
+          options: [`1) Les artistes vendront plus de disques.`, `2) Les artistes auront des financements.`, `3) Le public pourra découvrir la viole.`],
+          explanation: `Sophie se réjouit que le public découvre la viole. Правильный вариант 3.`,
+          source: `Учебный аудиоскрипт; ключи проверить по audio-fr.mp3`
+        },
+        correctIndex: 2
+      },
+      {
+        id: 7, task: 7, topic: "listen", type: "mc",
+        en: {
+          text: `Unlike violin, viola da gamba...`,
+          info: `Choose 1, 2 or 3.`,
+          options: [`1) longer shape.`, `2) more strings.`, `3) played between legs.`],
+          explanation: `Audio: la viole se joue entre les jambes. Correct option 3.`,
+          source: `Educational script; verify keys with audio-fr.mp3`
+        },
+        ru: {
+          text: `À la différence du violon, la viole de gambe...`,
+          info: `Выберите 1, 2 или 3.`,
+          options: [`1) a une forme beaucoup plus allongée.`, `2) a un plus grand nombre de cordes.`, `3) se joue entre les jambes du musicien.`],
+          explanation: `В аудио: la viole se joue entre les jambes. Правильный вариант 3.`,
+          source: `Учебный аудиоскрипт; ключи проверить по audio-fr.mp3`
+        },
+        correctIndex: 2
+      },
+      {
+        id: 8, task: 8, topic: "listen", type: "mc",
+        en: {
+          text: `What historical fact does Sophie tell?`,
+          info: `Choose 1, 2 or 3.`,
+          options: [`1) Viola ancestor of violin.`, `2) Viola born under Revolution.`, `3) Violin born same time as viola.`],
+          explanation: `Sophie says violin born approx same time as viola. Correct option 3.`,
+          source: `Educational script; verify keys with audio-fr.mp3`
+        },
+        ru: {
+          text: `Quel fait historique Sophie raconte-t-elle ?`,
+          info: `Выберите 1, 2 или 3.`,
+          options: [`1) La viole de gambe est l’ancêtre direct du violon.`, `2) La viole est née sous la Révolution française.`, `3) Le violon est né au même moment que la viole.`],
+          explanation: `Sophie dit que le violon est né à peu près au même moment que la viole. Правильный вариант 3.`,
+          source: `Учебный аудиоскрипт; ключи проверить по audio-fr.mp3`
+        },
+        correctIndex: 2
+      },
+      {
+        id: 9, task: 9, topic: "listen", type: "mc",
+        en: {
+          text: `Why did Sophie miss concert once?`,
+          info: `Choose 1, 2 or 3.`,
+          options: [`1) Viola broke due weather.`, `2) Score lost.`, `3) Musicians forgot notes.`],
+          explanation: `Audio: rain/humidity damaged instrument. Correct option 1.`,
+          source: `Educational script; verify keys with audio-fr.mp3`
+        },
+        ru: {
+          text: `Pourquoi Sophie a-t-elle déjà raté un concert ?`,
+          info: `Выберите 1, 2 или 3.`,
+          options: [`1) La viole s’est cassée à cause de la météo.`, `2) La partition pour la viole a été perdue.`, `3) Les musiciens ont oublié leurs notes.`],
+          explanation: `В аудио: à cause de la pluie et de l’humidité, l’instrument s’est abîmé. Правильный вариант 1.`,
+          source: `Учебный аудиоскрипт; ключи проверить по audio-fr.mp3`
+        },
+        correctIndex: 0
+      },
+      {
+        id: 10, task: 10, topic: "read", type: "sequence", len: 7, correct: "7281534",
+        en: {
+          text: `Match texts A–G with headings 1–8. One heading extra.`,
+          info: `1. Man recreates museum\n2. Toys thrown on ice\n3. Sculpture transferred to museum\n4. Animal eats ice cream\n5. Cheese-flavored ice cream\n6. Children dance on rink\n7. Visit museum for free\n8. Bears named by children`,
+          explanation: `A-7, B-2, C-8, D-1, E-5, F-3, G-4. Extra heading: 6.`,
+          source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Установите соответствие между текстами A–G и заголовками 1–8. Один заголовок лишний.`,
+          info: `1. Un homme recrée un musée\n2. Des jouets jetés sur la glace\n3. Une sculpture transférée au musée\n4. Un animal mange des glaces\n5. Une glace au goût de fromage\n6. Des enfants dansent à la patinoire\n7. Visiter un musée sans payer\n8. Des ours nommés par les enfants`,
+          explanation: `A-7, B-2, C-8, D-1, E-5, F-3, G-4. Лишний заголовок: 6.`,
+          source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 11, task: 11, topic: "read", type: "sequence", len: 6, correct: "216547",
+        en: {
+          text: `Fill gaps A–F with sentence parts 1–7. One part extra.`,
+          info: `1. frame image during filming\n2. I started during holidays\n3. person who made film\n4. video to my family and friend\n5. that I had to stand out\n6. those in our program\n7. especially after seeing videos of`,
+          explanation: `A-2, B-1, C-6, D-5, E-4, F-7. Extra part: 3.`,
+          source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Заполните пропуски A–F частями предложений 1–7. Одна часть лишняя.`,
+          info: `1. à cadrer l’image pendant le tournage\n2. je me suis lancé pendant les vacances\n3. la personne qui a pu réaliser ce film\n4. la vidéo qu’à ma famille et à mon ami\n5. que je devais me démarquer des autres\n6. ceux figurant dans notre programme\n7. surtout après avoir vu les vidéos de`,
+          explanation: `A-2, B-1, C-6, D-5, E-4, F-7. Лишняя часть: 3.`,
+          source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 12, task: 12, topic: "read", type: "mc",
+        en: {
+          text: `Bornholm inhabitants used stone disks to...`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) commemorate dead.`, `2) protect from enemies.`, `3) calculate solar cycles.`, `4) celebrate religious rites.`],
+          explanation: `Text: ancien lieu de culte. Answer 4.`,
+          source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Les habitants de Bornholm utilisaient les disques de pierre pour...`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) commémorer leurs morts.`, `2) se protéger des ennemis.`, `3) calculer les cycles solaires.`, `4) célébrer des rites religieux.`],
+          explanation: `В тексте: ancien lieu de culte. Ответ 4.`,
+          source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 3
+      },
+      {
+        id: 13, task: 13, topic: "read", type: "mc",
+        en: {
+          text: `Besides stone disks, inhabitants buried...`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) human remains.`, `2) food remains.`, `3) sun-shaped tools.`, `4) sun-shaped jewelry.`],
+          explanation: `Text: restes de festin. Answer 2.`,
+          source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `À côté des disques de pierre, les habitants enterraient des...`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) restes humains.`, `2) restes de nourriture.`, `3) outils en forme du soleil.`, `4) bijoux en forme du soleil.`],
+          explanation: `В тексте: restes de festin. Ответ 2.`,
+          source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 1
+      },
+      {
+        id: 14, task: 14, topic: "read", type: "mc",
+        en: {
+          text: `Why did inhabitants start burying disks?`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) Fear of drought appeared.`, `2) Fear of sun disappearance appeared.`, `3) Solar eclipse around -2900.`, `4) New solar calendar adopted.`],
+          explanation: `Hypothesis: fear of sun disappearing. Answer 2.`,
+          source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Pourquoi les habitants ont-ils commencé à enterrer les disques ?`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) La crainte de la sécheresse est apparue.`, `2) La peur de la disparition du soleil est apparue.`, `3) Une éclipse solaire a eu lieu autour de l’an -2900.`, `4) Un nouveau calendrier solaire a été adopté.`],
+          explanation: `Гипотеза: peur de la disparition du soleil. Ответ 2.`,
+          source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 1
+      },
+      {
+        id: 15, task: 15, topic: "read", type: "mc",
+        en: {
+          text: `To analyze prehistoric climate, scientists studied...`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) rings on tree trunks.`, `2) seeds fossils.`, `3) tree roots.`, `4) plant chemical composition.`],
+          explanation: `Text: cernes d’arbres. Answer 1.`,
+          source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Pour analyser le climat préhistorique, les scientifiques ont étudié la/des...`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) cercles sur les troncs d’arbres.`, `2) fossiles des graines d’arbres.`, `3) racines des arbres de la forêt.`, `4) composition chimique des plantes.`],
+          explanation: `В тексте: cernes d’arbres. Ответ 1.`,
+          source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 0
+      },
+      {
+        id: 16, task: 16, topic: "read", type: "mc",
+        en: {
+          text: `What did lake study reveal?`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) Sunlight quantity decreased.`, `2) Sunlight dried water bodies.`, `3) Water polluted by melting ice.`, `4) Sunlight destroyed microalgae.`],
+          explanation: `Dark layers — decreased luminosity. Answer 1.`,
+          source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Qu’a révélé l’étude des lacs par les scientifiques ?`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) La quantité de lumière du soleil avait diminué.`, `2) La lumière du soleil avait asséché les plans d’eau.`, `3) L’eau avait été polluée suite à la fonte des glaces.`, `4) La lumière du soleil avait détruit les microalgues.`],
+          explanation: `Тёмные слои — снижение luminosité. Ответ 1.`,
+          source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 0
+      },
+      {
+        id: 17, task: 17, topic: "read", type: "mc",
+        en: {
+          text: `Scientists assessed air quality by...`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) studying ancient vegetation.`, `2) analyzing historical archives.`, `3) drilling deep hole in ice.`, `4) installing surface sensors.`],
+          explanation: `Carottes de glace, obtenues par forage. Answer 3.`,
+          source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Les scientifiques ont évalué la qualité de l’air en...`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) étudiant la végétation ancienne.`, `2) analysant des archives historiques.`, `3) creusant un trou profond dans la glace.`, `4) installant des capteurs à la surface du glacier.`],
+          explanation: `carottes de glace, obtenues par forage. Ответ 3.`,
+          source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 2
+      },
+      {
+        id: 18, task: 18, topic: "read", type: "mc",
+        en: {
+          text: `Consequence of volcanic eruption?`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) Fine particles masked sun.`, `2) Climate warming accelerated.`, `3) Harvests destroyed by lava.`, `4) Homes destroyed by lava.`],
+          explanation: `Dust blocked sun rays. Answer 1.`,
+          source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Quelle a été la conséquence de l’éruption volcanique ?`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) Des particules fines ont masqué le soleil.`, `2) Le réchauffement climatique s’est accéléré.`, `3) Les récoltes agricoles ont été détruites par la lave.`, `4) Des habitations ont été détruites par la lave.`],
+          explanation: `Пыль блокировала rayons de soleil. Ответ 1.`,
+          source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 0
+      },
+      {
+        id: 19, task: 19, topic: "gram", type: "word", accepted: ["tropicale"],
+        en: {
+          text: `Transform TROPICAL:\n... dans la forêt 19____ ...`,
+          info: `forêt — feminine singular.`, explanation: `tropicale.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Преобразуйте TROPICAL:\n... dans la forêt 19____ ...`,
+          info: `forêt — женский род, ед. число.`, explanation: `tropicale.`, source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 20, task: 20, topic: "gram", type: "word", accepted: ["pleine"],
+        en: {
+          text: `Transform PLEIN:\n... (20____ lune, nouvelle lune...).`,
+          info: `Lune — feminine singular.`, explanation: `pleine lune.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Преобразуйте PLEIN:\n... (20____ lune, nouvelle lune...).`,
+          info: `Lune — женский род, ед. число.`, explanation: `pleine lune.`, source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 21, task: 21, topic: "gram", type: "word", accepted: ["installent"],
+        en: {
+          text: `Conjugate INSTALLER:\n... ils fabriquent et 21____ ...`,
+          info: `Subject ils, present tense.`, explanation: `ils installent.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Проспрягайте INSTALLER:\n... ils fabriquent et 21____ ...`,
+          info: `Подлежащее ils, présent.`, explanation: `ils installent.`, source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 22, task: 22, topic: "gram", type: "word", accepted: ["essentiels"],
+        en: {
+          text: `Transform ESSENTIEL:\nIls sont 22____ pour l’équilibre de l’île.`,
+          info: `Agreement with ils (masculine plural).`, explanation: `essentiels.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Преобразуйте ESSENTIEL:\nIls sont 22____ pour l’équilibre de l’île.`,
+          info: `Согласование с ils (м.р., мн.ч.).`, explanation: `essentiels.`, source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 23, task: 23, topic: "gram", type: "word", accepted: ["jardiniers"],
+        en: {
+          text: `Transform JARDINIER:\nCe sont de petits 23____ indispensables !`,
+          info: `Plural form.`, explanation: `jardiniers.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Преобразуйте JARDINIER:\nCe sont de petits 23____ indispensables !`,
+          info: `Множественное число.`, explanation: `jardiniers.`, source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 24, task: 24, topic: "gram", type: "word", accepted: ["bougeant"],
+        en: {
+          text: `Form gerund BOUGER:\n... en 24____ leur corps ...`,
+          info: `en + present participle.`, explanation: `en bougeant.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Образуйте герундий BOUGER:\n... en 24____ leur corps ...`,
+          info: `en + participe présent.`, explanation: `en bougeant.`, source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 25, task: 25, topic: "gram", type: "word", accepted: ["exceptionnelles"],
+        en: {
+          text: `Form from EXCEPTION:\n... ses productions 25____ d’opéra et de ballet...`,
+          info: `productions — feminine plural.`, explanation: `exceptionnelles.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Образуйте от EXCEPTION:\n... ses productions 25____ d’opéra et de ballet...`,
+          info: `productions — ж.р., мн.ч.`, explanation: `exceptionnelles.`, source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 26, task: 26, topic: "gram", type: "word", accepted: ["seulement"],
+        en: {
+          text: `Form from SEULE:\nLe Théâtre n’est pas 26____ un endroit...`,
+          info: `Adverb: not only.`, explanation: `seulement.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Образуйте от SEULE:\nLe Théâtre n’est pas 26____ un endroit...`,
+          info: `Наречие: не только.`, explanation: `seulement.`, source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 27, task: 27, topic: "gram", type: "word", accepted: ["danseurs"],
+        en: {
+          text: `Form from DANSE:\n... aux 27____ chevronnés de ballet...`,
+          info: `Masculine plural noun.`, explanation: `danseurs.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Образуйте от DANSE:\n... aux 27____ chevronnés de ballet...`,
+          info: `Существительное м.р., мн.ч.`, explanation: `danseurs.`, source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 28, task: 28, topic: "gram", type: "word", accepted: ["national"],
+        en: {
+          text: `Form from NATION:\nLe Musée 28____ des beaux-arts...`,
+          info: `Masculine singular adjective.`, explanation: `national.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Образуйте от NATION:\nLe Musée 28____ des beaux-arts...`,
+          info: `Прилагательное м.р., ед.ч.`, explanation: `national.`, source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 29, task: 29, topic: "gram", type: "word", accepted: ["expositions"],
+        en: {
+          text: `Form from EXPOSER:\nLes 29____ temporaires présentent...`,
+          info: `Feminine plural noun.`, explanation: `expositions.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Образуйте от EXPOSER:\nLes 29____ temporaires présentent...`,
+          info: `Существительное ж.р., мн.ч.`, explanation: `expositions.`, source: `Открытый вариант ЕГЭ-2026`
+        }
+      },
+      {
+        id: 30, task: 30, topic: "gram", type: "mc",
+        en: {
+          text: `On 30____ often hurricanes with nice little names...`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) balance`, `2) bétonne`, `3) baptise`, `4) bricole`],
+          explanation: `baptiser — to name. Answer 3.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `On 30____ souvent les ouragans avec de petits noms sympas...`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) balance`, `2) bétonne`, `3) baptise`, `4) bricole`],
+          explanation: `baptiser — называть. Ответ 3.`, source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 2
+      },
+      {
+        id: 31, task: 31, topic: "gram", type: "mc",
+        en: {
+          text: `... sometimes 31____ outcomes.`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) pratiques`, `2) optiques`, `3) cliniques`, `4) tragiques`],
+          explanation: `issues tragiques. Answer 4.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `... aux issues parfois 31____.`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) pratiques`, `2) optiques`, `3) cliniques`, `4) tragiques`],
+          explanation: `issues tragiques. Ответ 4.`, source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 3
+      },
+      {
+        id: 32, task: 32, topic: "gram", type: "mc",
+        en: {
+          text: `Otherwise said, 32____ storms !`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) élégantes`, `2) récentes`, `3) géantes`, `4) patientes`],
+          explanation: `tempêtes géantes. Answer 3.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Autrement dit, des tempêtes 32____ !`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) élégantes`, `2) récentes`, `3) géantes`, `4) patientes`],
+          explanation: `tempêtes géantes. Ответ 3.`, source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 2
+      },
+      {
+        id: 33, task: 33, topic: "gram", type: "mc",
+        en: {
+          text: `They manage to cause serious 33____ ...`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) dégâts`, `2) sénats`, `3) constats`, `4) mandats`],
+          explanation: `dégâts — damage. Answer 1.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Ils arrivent à provoquer de sacrés 33____ ...`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) dégâts`, `2) sénats`, `3) constats`, `4) mandats`],
+          explanation: `dégâts — ущерб. Ответ 1.`, source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 0
+      },
+      {
+        id: 34, task: 34, topic: "gram", type: "mc",
+        en: {
+          text: `... affect French overseas 34____ and territories...`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) renforcements`, `2) départements`, `3) comportements`, `4) hébergements`],
+          explanation: `départements. Answer 2.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `... touchent les 34____ et territoires français d’outre-mer...`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) renforcements`, `2) départements`, `3) comportements`, `4) hébergements`],
+          explanation: `départements. Ответ 2.`, source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 1
+      },
+      {
+        id: 35, task: 35, topic: "gram", type: "mc",
+        en: {
+          text: `... to evacuate 35____ !`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) situations`, `2) populations`, `3) réputations`, `4) admirations`],
+          explanation: `populations — population. Answer 2.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `... pour pouvoir évacuer les 35____ !`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) situations`, `2) populations`, `3) réputations`, `4) admirations`],
+          explanation: `populations — население. Ответ 2.`, source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 1
+      },
+      {
+        id: 36, task: 36, topic: "gram", type: "mc",
+        en: {
+          text: `Like hurricanes, tornadoes 36____ of wind whirlwinds...`,
+          info: `Choose 1, 2, 3 or 4.`,
+          options: [`1) contrôlent`, `2) comportent`, `3) consolent`, `4) composent`],
+          explanation: `se composer de. Answer 4.`, source: `Open variant EGE-2026`
+        },
+        ru: {
+          text: `Comme les ouragans, les tornades se 36____ de tourbillons de vent...`,
+          info: `Выберите 1, 2, 3 или 4.`,
+          options: [`1) contrôlent`, `2) comportent`, `3) consolent`, `4) composent`],
+          explanation: `se composer de. Ответ 4.`, source: `Открытый вариант ЕГЭ-2026`
+        },
+        correctIndex: 3
+      }
+    ];
+
+    // Process Quiz Data for current language
+    let quiz = [];
+
+    function prepareData() {
+      quiz = quizRaw.map(q => ({
+        ...q,
+        text: q[currentLang].text,
+        info: q[currentLang].info,
+        explanation: q[currentLang].explanation,
+        source: q[currentLang].source,
+        options: q[currentLang].options ? [...q[currentLang].options] : [],
+        correct: q.correctIndex !== undefined ? q.correctIndex : (q.currentLang === 'ru' ? q.ruOptions?.indexOf(q.options[q.correct]) : q.enOptions?.indexOf(q.options[q.correct])) 
+      }));
+      
+      // Fix for sequence/word types where options aren't arrays
+      quiz.forEach(item => {
+        if (!item.options.length && item.type !== 'mc') {
+             // Keep original logic for non-MC types handled in render/check
+        }
+      });
+    }
+
+    /* =========================================================
+       SPEECH SYNTHESIS
+       ========================================================= */
+    function refreshVoices() {
+      if (!("speechSynthesis" in window)) return;
+      const voices = speechSynthesis.getVoices();
+      frVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("fr")) || null;
+    }
+    function speakText(text, repeat = 1) {
+      if (!("speechSynthesis" in window)) { alert("Browser does not support SpeechSynthesis."); return; }
+      speechSynthesis.cancel();
+      let remaining = repeat;
+      function speakOne() {
+        if (remaining <= 0) return;
+        remaining--;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = "fr-FR";
+        if (frVoice) u.voice = frVoice;
+        u.rate = 0.92;
+        if (remaining > 0) u.onend = () => setTimeout(speakOne, 700);
+        speechSynthesis.speak(u);
+      }
+      speakOne();
+    }
+    function stopSpeech() { if ("speechSynthesis" in window) speechSynthesis.cancel(); }
+
+    /* =========================================================
+       WRITTEN AUDIO
+       ========================================================= */
+    function getWrittenAudio() { return document.getElementById("mainAudio"); }
+    function playWritten() {
+      stopOral();
+      stopSpeech();
+      const audio = getWrittenAudio();
+      if (audio && writtenAudioOK) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+          speakText(listeningScripts.task1, 2);
+        });
+      } else {
+        speakText(listeningScripts.task1, 2);
+      }
+    }
+    function toggleWritten() {
+      const audio = getWrittenAudio();
+      if (!audio) return;
+      if (audio.paused) audio.play(); else audio.pause();
+    }
+    function stopWritten() {
+      const audio = getWrittenAudio();
+      if (audio) { audio.pause(); audio.currentTime = 0; }
+    }
+
+    /* =========================================================
+       ORAL AUDIO (TASK 3)
+       ========================================================= */
+    function getOralAudio() { return document.getElementById("oralAudio"); }
+    function playOral() {
+      stopWritten();
+      stopSpeech();
+      const audio = getOralAudio();
+      if (!audio) return;
+      if (oralAudioOK) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+          speakText(document.getElementById("oralText3").textContent, 1);
+        });
+      } else {
+        speakText(document.getElementById("oralText3").textContent, 1);
+      }
+    }
+    function toggleOral() {
+      const audio = getOralAudio();
+      if (!audio) return;
+      if (audio.paused) audio.play(); else audio.pause();
+    }
+    function stopOral() {
+      const audio = getOralAudio();
+      if (audio) { audio.pause(); audio.currentTime = 0; }
+      stopSpeech();
+    }
+
+    /* =========================================================
+       VOCABULARY RENDERING
+       ========================================================= */
+    function renderLexique(list) {
+      const container = document.getElementById("lexiqueContainer");
+      if (!container) return;
+      container.innerHTML = "";
+      list.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "card lex-card";
+        card.innerHTML = `
+          <div class="lex-fr">${escapeHtml(item.fr)}</div>
+          <div class="lex-ru">${escapeHtml(item.ru)}</div>
+          <button class="speak-btn" type="button" title="Listen">🔊</button>
+          <div class="lex-hidden">${escapeHtml(item.ex)}</div>
+        `;
+        const hidden = card.querySelector(".lex-hidden");
+        const speakBtn = card.querySelector(".speak-btn");
+        speakBtn.addEventListener("click", e => { e.stopPropagation(); speakText(item.fr + ". " + item.ex, 1); });
+        card.addEventListener("click", () => {
+          const isHidden = hidden.style.display === "none" || hidden.style.display === "";
+          hidden.style.display = isHidden ? "block" : "none";
+          card.style.borderColor = isHidden ? "var(--accent)" : "rgba(255, 255, 255, 0.09)";
+        });
+        container.appendChild(card);
+      });
+    }
+    function filterLexique(query) {
+      const q = normalizeSearch(query).trim();
+      renderLexique(lexiqueDatabase.filter(item => {
+        const fr = normalizeSearch(item.fr);
+        const ru = normalizeSearch(item.ru);
+        const ex = normalizeSearch(item.ex);
+        return fr.includes(q) || ru.includes(q) || ex.includes(q);
+      }));
+    }
+
+    /* =========================================================
+       FILTERS AND TIMER
+       ========================================================= */
+    function setFilter(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+      applyFilter();
+    }
+    function applyFilter() {
+      quiz.forEach(q => {
+        const block = document.getElementById("q" + q.id);
+        if (block) block.style.display = (currentFilter === "all" || q.topic === currentFilter) ? "" : "none";
+      });
+    }
+    function updateFilterLabels() {
+      const c = { listen: 0, read: 0, gram: 0 };
+      quiz.forEach(q => c[q.topic]++);
+      document.getElementById("filterAll").textContent = `${loc("filterAll")} (${quiz.length})`;
+      document.getElementById("filterListen").textContent = `${loc("filterListen")} (${c.listen})`;
+      document.getElementById("filterRead").textContent = `${loc("filterRead")} (${c.read})`;
+      document.getElementById("filterGram").textContent = `${loc("filterGram")} (${c.gram})`;
+    }
+    
+    // Timer Logic
+    let timerTotal = 190 * 60; 
+    let timerRemaining = timerTotal;
+    let timerRunning = false;
+
+    function formatTime(sec) {
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      return [h, m, s].map(function (v) { return String(v).padStart(2, "0"); }).join(":");
+    }
+
+    function updateTimerDisplay() {
+      const display = document.getElementById("timerDisplay");
+      const widget = document.getElementById("timerWidget");
+      display.textContent = formatTime(timerRemaining);
+      widget.classList.toggle("warning", timerRemaining <= 300 && timerRemaining > 60);
+      widget.classList.toggle("danger", timerRemaining <= 60);
+    }
+
+    function updateTimerButton() {
+      const btn = document.getElementById("timerToggle");
+      btn.textContent = timerRunning ? "⏸" : "▶";
+      btn.setAttribute("title", timerRunning ? loc("timerPause") : loc("timerStart"));
+      btn.setAttribute("aria-label", timerRunning ? loc("timerPause") : loc("timerStart"));
+    }
+
+    function stopTimer() {
+      timerRunning = false;
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      updateTimerButton();
+    }
+
+    function startTimer() {
+      if (timerRunning || timerRemaining <= 0) return;
+      timerRunning = true;
+      timerInterval = setInterval(function () {
+        if (timerRemaining > 0) {
+          timerRemaining--;
+          updateTimerDisplay();
+        }
+        if (timerRemaining === 0) {
+          stopTimer();
+          alert(loc("timerUp"));
+        }
+      }, 1000);
+      updateTimerButton();
+    }
+
+    function toggleTimer() {
+      if (timerRunning) stopTimer();
+      else startTimer();
+    }
+
+    function resetTimer() {
+      stopTimer();
+      timerRemaining = timerTotal;
+      updateTimerDisplay();
+    }
+
+    function updateTimerLabels() {
+      const preset = document.getElementById("timerPreset");
+      const presets = [
+        { seconds: 190 * 60, key: "timerFr" },
+        { seconds: 60 * 60, key: "timerPractice" }
+      ];
+
+      preset.innerHTML = presets.map(function (p) {
+        return `<option value="${p.seconds}">${escapeHtml(loc(p.key))}</option>`;
+      }).join("");
+
+      const currentValue = parseInt(preset.value, 10);
+      if (!presets.some(p => p.seconds === currentValue)) {
+         preset.value = String(190 * 60);
+         timerTotal = 190 * 60;
+      } else {
+         timerTotal = currentValue;
+      }
+      
+      document.getElementById("timerReset").setAttribute("title", loc("timerReset"));
+      document.getElementById("timerReset").setAttribute("aria-label", loc("timerReset"));
+      updateTimerButton();
+      updateTimerDisplay();
+    }
+
+    /* =========================================================
+       RENDER QUESTIONS
+       ========================================================= */
+    function renderAllQuestions() {
+      const container = document.getElementById("quizContainer");
+      container.innerHTML = "";
+
+      const audioSection = document.createElement("div");
+      audioSection.className = "audio-section";
+      audioSection.innerHTML = `
+        <span class="audio-section-tag">🎧 Section 1. Listening (Tasks 1–9)</span>
+        <h3 class="audio-section-title">Audio recording — <code>${AUDIO_WRITTEN}</code></h3>
+        <p class="audio-section-note">
+          Main file — <strong>${AUDIO_WRITTEN}</strong> (next to index.html).
+          If unavailable, backup educational voiceovers used.
+          On exam recording plays <strong>twice</strong>.
+          <br><br>
+          <strong>Note:</strong> Keys for tasks 1–9 should be verified against official audio.
+          Backup scripts are educational.
+        </p>
+        <div class="q-audio">
+          <audio id="mainAudio" controls preload="metadata" src="${AUDIO_WRITTEN}"></audio>
+          <div id="audioError" class="audio-error">
+            ⚠️ <strong>File ${AUDIO_WRITTEN} failed to load.</strong> Check name and location.
+            Backup educational voiceovers active.
+          </div>
+        </div>
+        <div class="audio-controls">
+          <button class="btn small" onclick="playWritten()">▶ Main Audio / Backup Task 1</button>
+          <button class="btn small secondary" onclick="toggleWritten()">⏯ Pause / Resume</button>
+          <button class="btn small secondary" onclick="stopWritten()">⏹ Stop</button>
+          <button class="btn small secondary" onclick="speakText(listeningScripts.task1, 2)">🔊 Backup: Task 1</button>
+          <button class="btn small secondary" onclick="speakText(listeningScripts.task2, 2)">🔊 Backup: Task 2</button>
+          <button class="btn small secondary" onclick="speakText(listeningScripts.interview, 2)">🔊 Backup: Tasks 3–9</button>
+        </div>
+      `;
+      container.appendChild(audioSection);
+
+      const audioEl = document.getElementById("mainAudio");
+      const errorDiv = document.getElementById("audioError");
+      if (audioEl) {
+        if (audioEl.readyState >= 2) {
+          writtenAudioOK = true;
+          if (errorDiv) errorDiv.style.display = "none";
+        }
+        audioEl.addEventListener("canplaythrough", () => { writtenAudioOK = true; if (errorDiv) errorDiv.style.display = "none"; });
+        audioEl.addEventListener("loadeddata", () => { writtenAudioOK = true; if (errorDiv) errorDiv.style.display = "none"; });
+        audioEl.addEventListener("error", () => { writtenAudioOK = false; if (errorDiv) errorDiv.style.display = "block"; });
+      }
+
+      quiz.forEach(q => {
+        const block = document.createElement("div");
+        block.className = "question-block";
+        block.id = "q" + q.id;
+
+        let controlHtml = "";
+        if (q.type === "mc") {
+          let optionsHtml = "";
+          q.options.forEach((opt, idx) => {
+            optionsHtml += `<button class="option" data-q="${q.id}" data-idx="${idx}" onclick="handleMc(${q.id}, ${idx})">${escapeHtml(opt)}</button>`;
+          });
+          controlHtml = `<div class="options" id="options-${q.id}">${optionsHtml}</div>`;
+        } else if (q.type === "sequence") {
+          controlHtml = `
+            <div class="input-row">
+              <input id="input-${q.id}" class="answer-input sequence" inputmode="numeric" placeholder="Digits only, e.g.: 123456" maxlength="${q.len + 12}" />
+              <button class="btn small check" onclick="checkInput(${q.id})">Check</button>
+            </div>`;
+        } else if (q.type === "word") {
+          controlHtml = `
+            <div class="input-row">
+              <input id="input-${q.id}" class="answer-input" placeholder="Enter word" autocomplete="off" />
+              <button class="btn small check" onclick="checkInput(${q.id})">Check</button>
+            </div>`;
+        }
+
+        let textButtonHtml = "";
+        if (q.topic === "read" || q.topic === "gram") {
+          textButtonHtml = `<div class="audio-controls"><button class="btn small secondary" onclick="scrollToId('texts')">📖 Open Texts</button></div>`;
+        }
+
+        block.innerHTML = `
+          <div class="${q.topic === 'listen' ? 'q-number listen' : q.topic === 'read' ? 'q-number read' : 'q-number gram'}">${escapeHtml(q.topic === 'listen' ? loc('topicListen') : q.topic === 'read' ? loc('topicRead') : loc('topicGram'))}, ${loc('p2Task')} ${q.task}</div>
+          <div class="q-part"><span class="q-part-label">${escapeHtml(loc("qLabel1"))}</span><div class="q-text">${escapeHtml(q.text)}</div></div>
+          <div class="q-info"><span class="q-part-label" style="color:#d8ccff;">${escapeHtml(loc("qLabel2"))}</span><p style="margin:0;">${escapeHtml(q.info)}</p></div>
+          ${textButtonHtml}
+          <div class="q-part"><span class="q-trainer-label">${escapeHtml(loc("qLabel3"))}</span>${controlHtml}</div>
+          <div id="result-${q.id}"></div>
+        `;
+        container.appendChild(block);
+      });
+
+      updateFilterLabels();
+      updateStats();
+      applyFilter();
+    }
+
+    /* =========================================================
+       ANSWER HANDLING
+       ========================================================= */
+    function handleMc(qId, selectedIdx) {
+      const q = quiz.find(item => item.id === qId);
+      if (!q || savedAnswers[qId] !== undefined) return;
+      const isCorrect = selectedIdx === q.correct;
+      savedAnswers[qId] = { value: q.options[selectedIdx], correct: isCorrect };
+      const optionsBox = document.getElementById("options-" + q.id);
+      if (optionsBox) {
+        optionsBox.querySelectorAll(".option").forEach(btn => {
+          btn.disabled = true;
+          const idx = Number(btn.dataset.idx);
+          if (idx === q.correct) btn.classList.add("correct");
+          if (idx === selectedIdx && idx !== q.correct) btn.classList.add("wrong");
+        });
+      }
+      showResult(q, q.options[selectedIdx], isCorrect, q.options[q.correct]);
+      updateStats(); updateSummary();
+    }
+    function checkInput(qId) {
+      const q = quiz.find(item => item.id === qId);
+      if (!q || savedAnswers[qId] !== undefined) return;
+      const input = document.getElementById("input-" + qId);
+      if (!input) return;
+      const raw = input.value.trim();
+      if (!raw) { alert("Enter answer."); return; }
+      let isCorrect = false, correctDisplay = "";
+      if (q.type === "sequence") {
+        const digits = raw.replace(/\D/g, "");
+        isCorrect = digits === q.correct;
+        correctDisplay = q.correct;
+      } else if (q.type === "word") {
+        const norm = normalizeFrench(raw);
+        isCorrect = q.accepted.some(a => normalizeFrench(a) === norm);
+        correctDisplay = q.accepted[0];
+      }
+      savedAnswers[qId] = { value: raw, correct: isCorrect };
+      input.disabled = true;
+      const btn = document.querySelector(`#q${qId} .check`);
+      if (btn) btn.disabled = true;
+      showResult(q, raw, isCorrect, correctDisplay);
+      updateStats(); updateSummary();
+    }
+    function showResult(q, selectedValue, isCorrect, correctDisplay) {
+      const resultBox = document.getElementById("result-" + q.id);
+      if (!resultBox) return;
+      const cls = isCorrect ? "correct" : "wrong";
+      const verdictText = isCorrect ? loc("resCorrect") : loc("resWrong");
+      resultBox.innerHTML = `
+        <div class="result-block ${cls}" role="status" aria-live="polite">
+          <div class="verdict ${cls}">${verdictText}</div>
+          <div class="result-row"><strong>${escapeHtml(loc("resAns"))}</strong> ${escapeHtml(correctDisplay)}</div>
+          <div class="result-row"><strong>${escapeHtml(loc("resExp"))}</strong> ${escapeHtml(q.explanation)}</div>
+          <div class="source-row"><strong>${escapeHtml(loc("resSrc"))}</strong> ${escapeHtml(q.source)}</div>
+        </div>`;
+    }
+
+    /* =========================================================
+       STATISTICS
+       ========================================================= */
+    function getChecklistProgress() {
+      const inputs = document.querySelectorAll("#checklistUl input");
+      if (!inputs.length) return 0;
+      let done = 0;
+      inputs.forEach(i => { if (i.checked) done++; });
+      return Math.round((done / inputs.length) * 100);
+    }
+    function updateStats() {
+      const total = quiz.length;
+      let answered = 0, correct = 0;
+      const stats = { listen: { c: 0, t: 0 }, read: { c: 0, t: 0 }, gram: { c: 0, t: 0 } };
+      quiz.forEach(q => {
+        stats[q.topic].t++;
+        const saved = savedAnswers[q.id];
+        if (saved) {
+          answered++;
+          if (saved.correct) { correct++; stats[q.topic].c++; }
+        }
+      });
+      document.getElementById("answeredCount").textContent = answered + "/" + total;
+      document.getElementById("correctCount").textContent = correct;
+      document.getElementById("checklistProgress").textContent = getChecklistProgress() + "%";
+      document.getElementById("overall").value = Math.round(((answered / total) * 100 + getChecklistProgress()) / 2);
+      window.examStats = stats;
+    }
+    function updateSummary() {
+      const summaryBox = document.getElementById("summaryBox");
+      const total = quiz.length;
+      let answered = 0, correct = 0;
+      quiz.forEach(q => {
+        const saved = savedAnswers[q.id];
+        if (saved) { answered++; if (saved.correct) correct++; }
+      });
+      if (answered < total) {
+        summaryBox.innerHTML = `<div class="summary">
+          <p style="color:#9aa4c8;margin:0;">${escapeHtml(loc("sumDone"))} <strong>${answered}</strong> ${escapeHtml(loc("sumOf"))} ${total}</p>
+          <p style="color:#9aa4c8;margin:8px 0 0 0;">${escapeHtml(loc("sumCorr"))} <strong>${correct}</strong></p>
+        </div>`;
+        return;
+      }
+      const percent = Math.round((correct / total) * 100);
+      const verdict = percent >= 85 ? loc("verExc") :
+                      percent >= 60 ? loc("verGood") :
+                      loc("verNeed");
+      const s = window.examStats || { listen: { c: 0, t: 1 }, read: { c: 0, t: 1 }, gram: { c: 0, t: 1 } };
+      const lp = Math.round((s.listen.c / s.listen.t) * 100) || 0;
+      const rp = Math.round((s.read.c / s.read.t) * 100) || 0;
+      const gp = Math.round((s.gram.c / s.gram.t) * 100) || 0;
+      summaryBox.innerHTML = `<div class="summary">
+        <div class="score">${correct}/${total}</div>
+        <p style="margin:8px 0;">${verdict}</p>
+        <p style="color:#9aa4c8;margin:0;">Overall: ${percent}%</p>
+        <div style="display:flex; justify-content:center; gap:20px; margin-top:16px; font-size:14px; color:#dbe3ff; flex-wrap:wrap;">
+          <span>🎧 Listening: <strong>${lp}%</strong></span>
+          <span>📖 Reading: <strong>${rp}%</strong></span>
+          <span>✍️ Grammar: <strong>${gp}%</strong></span>
+        </div>
+      </div>`;
+    }
+
+    /* =========================================================
+       DRAFTS
+       ========================================================= */
+    function updateWordCounter(ta) {
+      const val = ta.value;
+      manualNotes[ta.dataset.task] = val;
+      const words = val.trim() ? val.trim().split(/\s+/).filter(Boolean).length : 0;
+      const min = Number(ta.dataset.min) || 0;
+      const max = Number(ta.dataset.max) || 9999;
+      let color = "var(--muted)";
+      if (words < min) color = "var(--red)";
+      else if (words > max) color = "var(--orange)";
+      else color = "var(--green)";
+      const counterEl = document.getElementById("counter-" + ta.dataset.task);
+      if (counterEl) counterEl.innerHTML = `Words: <strong style="color:${color}">${words}</strong> (limit: ${min}–${max})`;
+    }
+
+    /* =========================================================
+       RESET
+       ========================================================= */
+    function resetAll() {
+      if (!confirm(loc("confReset"))) return;
+
+      savedAnswers = {};
+      manualNotes = {};
+
+      stopSpeech();
+      stopWritten();
+      stopOral();
+
+      writtenAudioOK = false;
+      oralAudioOK = false;
+
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+
+      timeLeft = EXAM_MINUTES * 60;
+      timerRemaining = timeLeft;
+      updateTimerDisplay();
+      document.getElementById("examTimer").style.color = "var(--accent)";
+
+      document.querySelectorAll(".draft-area").forEach(ta => {
+        ta.value = "";
+        updateWordCounter(ta);
+      });
+
+      document.querySelectorAll("#checklistUl input").forEach(i => {
+        i.checked = false;
+        i.closest(".check-item").classList.remove("done");
+      });
+
+      renderAllQuestions();
+
+      const oral = getOralAudio();
+      if (oral) oral.load();
+
+      updateStats();
+      updateSummary();
+    }
+
+    /* =========================================================
+       COPY PHONE
+       ========================================================= */
+    function copyPhone() {
+      const phone = "89202275676";
+      const status = document.getElementById("copyStatus");
+      const show = () => { status.textContent = loc("copied"); setTimeout(() => { status.textContent = ""; }, 2500); };
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(phone).then(show).catch(() => fallbackCopy(phone, show));
+      } else fallbackCopy(phone, show);
+    }
+    function fallbackCopy(text, cb) {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      try { document.execCommand("copy"); cb(); } catch (e) { alert(loc("errCopy") + text); }
+      document.body.removeChild(ta);
+    }
+
+    /* =========================================================
+       CHECKLIST AND PLAN DATA
+       ========================================================= */
+    const checklistItemsData = [
+      { key: "ch1", labelEn: "Reviewed articles le / la / les / un / une / des", labelRu: "Повторил артикли le / la / les / un / une / des" },
+      { key: "ch2", labelEn: "Practiced prepositions de, à, dans, sur, sous, avec, sans", labelRu: "Отработал предлоги de, à, dans, sur, sous, avec, sans" },
+      { key: "ch3", labelEn: "Reviewed tenses présent, passé composé, imparfait, futur", labelRu: "Повторил времена présent, passé composé, imparfait, futur" },
+      { key: "ch4", labelEn: "Practiced past participle agreement in passé composé", labelRu: "Отработал согласование причастия в passé composé" },
+      { key: "ch5", labelEn: "Reviewed subjunctive and typical constructions", labelRu: "Повторил субъюнктив и типичные конструкции" },
+      { key: "ch6", labelEn: "Practiced pronouns y, en, COD, COI", labelRu: "Отработал местоимения y, en, COD, COI" },
+      { key: "ch7", labelEn: "Reviewed word formation: suffixes of nouns and adjectives", labelRu: "Повторил словообразование: суффиксы существительных и прилагательных" },
+      { key: "ch8", labelEn: "Practiced listening: 6 statements", labelRu: "Отработал аудирование: 6 высказываний" },
+      { key: "ch9", labelEn: "Practiced listening: dialogue True / False / Not stated", labelRu: "Отработал аудирование: диалог Vrai / Faux / Aucune information" },
+      { key: "ch10", labelEn: "Practiced listening: interview", labelRu: "Отработал аудирование: интервью" },
+      { key: "ch11", labelEn: "Reviewed reading: matching texts and headings", labelRu: "Повторил чтение: соответствие текстов и заголовков" },
+      { key: "ch12", labelEn: "Practiced reading with gaps A–F", labelRu: "Отработал чтение с пропусками A–F" },
+      { key: "ch13", labelEn: "Checked understanding of popular science text", labelRu: "Проверил понимание научно-популярного текста" },
+      { key: "ch14", labelEn: "Practiced grammar: word forms 19–24", labelRu: "Отработал грамматику: формы слов 19–24" },
+      { key: "ch15", labelEn: "Practiced word formation 25–29", labelRu: "Отработал словообразование 25–29" },
+      { key: "ch16", labelEn: "Practiced vocabulary in text 30–36", labelRu: "Отработал лексику в тексте 30–36" },
+      { key: "ch17", labelEn: "Wrote email 37", labelRu: "Написал электронное письмо 37" },
+      { key: "ch18", labelEn: "Checked email length 100–140 words", labelRu: "Проверил объём письма 100–140 слов" },
+      { key: "ch19", labelEn: "Wrote statement 38.1 or 38.2", labelRu: "Написал высказывание 38.1 или 38.2" },
+      { key: "ch20", labelEn: "Checked statement length 200–250 words", labelRu: "Проверил объём высказывания 200–250 слов" },
+      { key: "ch21", labelEn: "Practiced reading aloud", labelRu: "Отработал чтение вслух" },
+      { key: "ch22", labelEn: "Practiced 4 questions based on ad", labelRu: "Отработал 4 вопроса по объявлению" },
+      { key: "ch23", labelEn: "Practiced interview of 5 questions (audio-fr-oral.mp3)", labelRu: "Отработал интервью из 5 вопросов (audio-fr-oral.mp3)" },
+      { key: "ch24", labelEn: "Practiced project speech with two photos", labelRu: "Отработал проектную речь по двум фото" }
+    ];
+
+    const planDaysData = [
+      { day: 1, critical: true, en: "Diagnostics: exam structure, weak topics.", ru: "Диагностика: структура экзамена, слабые темы." },
+      { day: 2, critical: false, en: "Phonetics and reading aloud: stress, intonation, liaisons.", ru: "Фонетика и чтение вслух: ударение, интонация, liaisons." },
+      { day: 3, critical: false, en: "Articles, prepositions, basic grammar.", ru: "Артикли, предлоги, базовая грамматика." },
+      { day: 4, critical: false, en: "Present tense, verbs groups 1–3.", ru: "Настоящее время, глаголы 1–3 групп." },
+      { day: 5, critical: false, en: "Passé composé vs imparfait.", ru: "Passé composé vs imparfait." },
+      { day: 6, critical: false, en: "Futur simple, conditionnel, modal verbs.", ru: "Futur simple, conditionnel, модальные глаголы." },
+      { day: 7, critical: false, en: "Pronouns y, en, COD, COI.", ru: "Местоимения y, en, COD, COI." },
+      { day: 8, critical: false, en: "Subjunctive: after which conjunctions and verbs.", ru: "Субъюнктив: после каких союзов и глаголов." },
+      { day: 9, critical: false, en: "Past participle and adjective agreement.", ru: "Согласование причастий и прилагательных." },
+      { day: 10, critical: false, en: "Word formation: nouns.", ru: "Словообразование: существительные." },
+      { day: 11, critical: false, en: "Word formation: adjectives and adverbs.", ru: "Словообразование: прилагательные и наречия." },
+      { day: 12, critical: false, en: "Vocabulary: family, home, school, work.", ru: "Лексика: семья, дом, школа, работа." },
+      { day: 13, critical: false, en: "Vocabulary: city, transport, travel.", ru: "Лексика: город, транспорт, путешествия." },
+      { day: 14, critical: false, en: "Vocabulary: culture, art, history.", ru: "Лексика: культура, искусство, история." },
+      { day: 15, critical: true, en: "Listening: 6 statements.", ru: "Аудирование: 6 высказываний." },
+      { day: 16, critical: true, en: "Listening: dialogue True / False / Not stated.", ru: "Аудирование: диалог Vrai / Faux / Aucune information." },
+      { day: 17, critical: true, en: "Listening: interview.", ru: "Аудирование: интервью." },
+      { day: 18, critical: true, en: "Reading: matching texts and headings.", ru: "Чтение: соответствие текстов и заголовков." },
+      { day: 19, critical: true, en: "Reading: gaps A–F.", ru: "Чтение: пропуски A–F." },
+      { day: 20, critical: true, en: "Reading: text comprehension 12–18.", ru: "Чтение: понимание текста 12–18." },
+      { day: 21, critical: true, en: "Grammar and vocabulary: tasks 19–36.", ru: "Грамматика и лексика: задания 19–36." },
+      { day: 22, critical: true, en: "Writing 37: email.", ru: "Письмо 37: электронное письмо." },
+      { day: 23, critical: true, en: "Writing 38: statement based on data.", ru: "Письмо 38: высказывание по данным." },
+      { day: 24, critical: false, en: "Speaking part: 4 tasks.", ru: "Устная часть: 4 задания." },
+      { day: 25, critical: false, en: "Final practice test and mistake analysis.", ru: "Финальный пробник и разбор ошибок." }
+    ];
+
+    function renderChecklist() {
+      const ul = document.getElementById("checklistUl");
+      ul.innerHTML = checklistItemsData.map(function (item) {
+        const labelText = currentLang === "ru" ? item.labelRu : item.labelEn;
+        return `
+          <li class="check-item">
+            <input type="checkbox" id="${item.key}" data-key="${item.key}" />
+            <label for="${item.key}">${escapeHtml(labelText)}</label>
+          </li>
+        `;
+      }).join("");
+    }
+
+    function renderPlan() {
+      const L = I18N[currentLang];
+      document.getElementById("planGrid").innerHTML = planDaysData.map(function (d) {
+        const text = currentLang === "ru" ? d.ru : d.en;
+        return `
+          <div class="day ${d.critical ? "critical" : ""}">
+            <b>${escapeHtml(L.dayPrefix)} ${d.day}</b>
+            ${escapeHtml(text)}
+          </div>
+        `;
+      }).join("");
+    }
+
+    function applyUIText() {
+      const L = I18N[currentLang];
+      document.title = L.docTitle;
+      document.documentElement.lang = currentLang;
+
+      const meta = document.querySelector('meta[name="description"]');
+      if (meta) meta.setAttribute("content", L.metaDesc);
+
+      document.querySelectorAll("[data-i18n]").forEach(function (el) {
+        const key = el.dataset.i18n;
+        if (L[key] != null) el.innerHTML = L[key];
+      });
+    }
+
+    function setLang(lang) {
+      currentLang = lang;
+      document.querySelectorAll(".lang-option").forEach(function (sp) {
+        sp.classList.toggle("active", sp.dataset.lang === lang);
+      });
+      applyUIText();
+      prepareData();
+      renderChecklist();
+      renderPlan();
+      renderAllQuestions();
+      updateTimerLabels();
+    }
+
+    /* =========================================================
+       INITIALIZATION
+       ========================================================= */
+    document.addEventListener("DOMContentLoaded", () => {
+      localStorage.removeItem(STORAGE.answers);
+      localStorage.removeItem(STORAGE.checklist);
+      localStorage.removeItem(STORAGE.shuffle);
+      localStorage.removeItem(STORAGE.manual);
+
+      savedAnswers = {}; manualNotes = {};
+      
+      refreshVoices();
+      if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = refreshVoices;
+
+      prepareData();
+      applyUIText();
+      renderChecklist();
+      renderPlan();
+      renderAllQuestions();
+      renderLexique(lexiqueDatabase);
+      updateTimerLabels();
+      updateTimerDisplay();
+
+      const oralAudio = document.getElementById("oralAudio");
+      const oralError = document.getElementById("oralAudioError");
+      if (oralAudio) {
+        if (oralAudio.readyState >= 2) {
+          oralAudioOK = true;
+          if (oralError) oralError.style.display = "none";
+        }
+        oralAudio.addEventListener("canplaythrough", () => { oralAudioOK = true; if (oralError) oralError.style.display = "none"; });
+        oralAudio.addEventListener("loadeddata", () => { oralAudioOK = true; if (oralError) oralError.style.display = "none"; });
+        oralAudio.addEventListener("error", () => { oralAudioOK = false; if (oralError) oralError.style.display = "block"; });
+      }
+
+      document.querySelectorAll(".draft-area").forEach(ta => {
+        ta.addEventListener("input", () => updateWordCounter(ta));
+        updateWordCounter(ta);
+      });
+      document.querySelectorAll("#checklistUl input").forEach(input => {
+        input.checked = false;
+        input.addEventListener("change", () => {
+          input.closest(".check-item").classList.toggle("done", input.checked);
+          updateStats();
+        });
+      });
+      updateStats();
+
+      document.getElementById("langToggle").addEventListener("click", function () {
+        setLang(currentLang === "en" ? "ru" : "en");
+      });
+
+      document.getElementById("timerToggle").addEventListener("click", toggleTimer);
+      document.getElementById("timerReset").addEventListener("click", resetTimer);
+
+      document.getElementById("timerPreset").addEventListener("change", function (e) {
+        timerTotal = parseInt(e.target.value, 10);
+        resetTimer();
+      });
+    });
+  </script>
+</body>
+</html>
